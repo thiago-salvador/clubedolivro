@@ -1,21 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Send, 
-  Mail, 
-  Users, 
-  Filter, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Eye,
-  Clock,
-  CheckCircle,
-  XCircle,
-  BarChart3
-} from 'lucide-react';
+import { Send, Mail, Clock, FileText, AlertCircle, Plus, Edit2, Trash2, Smartphone, Users, Eye, Edit, CheckCircle, XCircle, BarChart3 } from 'lucide-react';
 import { notificationService, NotificationTemplate, ScheduledNotification } from '../../services/notification.service';
 import { studentService, StudentWithTags } from '../../services/student.service';
 import { tagService } from '../../services/tag.service';
+import WhatsAppTester from '../../components/admin/WhatsAppTester';
 
 interface EmailDraft {
   id?: string;
@@ -30,7 +18,7 @@ interface EmailDraft {
 
 const Notifications: React.FC = () => {
   // Estados principais
-  const [activeTab, setActiveTab] = useState<'send' | 'templates' | 'queue' | 'stats'>('send');
+  const [activeTab, setActiveTab] = useState<'send' | 'templates' | 'queue' | 'stats' | 'whatsapp'>('send');
   const [emailDraft, setEmailDraft] = useState<EmailDraft>({
     subject: '',
     body: '',
@@ -692,6 +680,7 @@ const Notifications: React.FC = () => {
               { id: 'send', label: 'Enviar Email', icon: Send },
               { id: 'templates', label: 'Templates', icon: Edit },
               { id: 'queue', label: 'Fila de Envio', icon: Clock },
+              { id: 'whatsapp', label: 'WhatsApp', icon: Smartphone },
             ].map(tab => (
               <button
                 key={tab.id}
@@ -713,6 +702,7 @@ const Notifications: React.FC = () => {
           {activeTab === 'send' && renderSendTab()}
           {activeTab === 'templates' && renderTemplatesTab()}
           {activeTab === 'queue' && renderQueueTab()}
+          {activeTab === 'whatsapp' && <WhatsAppTester />}
         </div>
       </div>
     </div>
