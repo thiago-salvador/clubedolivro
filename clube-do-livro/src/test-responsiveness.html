@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Responsividade - Clube do Livro</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .test-container {
+            background: #f0f0f0;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        .device-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #333;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+        .breakpoint-indicator {
+            display: none;
+            font-weight: bold;
+            color: #B8860B;
+        }
+        
+        /* Breakpoints do Tailwind */
+        @media (min-width: 640px) {
+            .sm-show { display: block; }
+        }
+        @media (min-width: 768px) {
+            .md-show { display: block; }
+        }
+        @media (min-width: 1024px) {
+            .lg-show { display: block; }
+        }
+        @media (min-width: 1280px) {
+            .xl-show { display: block; }
+        }
+    </style>
+</head>
+<body>
+    <div class="device-info">
+        <div>Largura: <span id="width"></span>px</div>
+        <div>Altura: <span id="height"></span>px</div>
+        <div class="breakpoint-indicator sm-show">SM: 640px+</div>
+        <div class="breakpoint-indicator md-show">MD: 768px+</div>
+        <div class="breakpoint-indicator lg-show">LG: 1024px+</div>
+        <div class="breakpoint-indicator xl-show">XL: 1280px+</div>
+    </div>
+
+    <h1>Teste de Responsividade - Clube do Livro</h1>
+    
+    <div class="test-container">
+        <h2>Checklist de Componentes</h2>
+        <ul>
+            <li>✅ Navigation - Header fixo responsivo</li>
+            <li>✅ Hero - Texto e botões adaptáveis</li>
+            <li>✅ About Section - Grid de 2 colunas → 1 coluna</li>
+            <li>✅ Benefits - Grid responsivo com ícones</li>
+            <li>✅ Community - Imagem e texto reorganizados</li>
+            <li>✅ Testimonials - Carrossel adaptável (3 → 2 → 1)</li>
+            <li>✅ Enrollment - Cards empilhados em mobile</li>
+        </ul>
+    </div>
+
+    <div class="test-container">
+        <h2>Dispositivos Testados</h2>
+        <ul>
+            <li>📱 Mobile: 320px - 480px</li>
+            <li>📱 Mobile Large: 481px - 640px</li>
+            <li>📋 Tablet: 641px - 1024px</li>
+            <li>💻 Desktop: 1025px - 1440px</li>
+            <li>🖥️ Desktop Large: 1441px+</li>
+        </ul>
+    </div>
+
+    <script>
+        function updateDimensions() {
+            document.getElementById('width').textContent = window.innerWidth;
+            document.getElementById('height').textContent = window.innerHeight;
+        }
+        
+        updateDimensions();
+        window.addEventListener('resize', updateDimensions);
+    </script>
+</body>
+</html>

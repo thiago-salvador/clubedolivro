@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { cacheService, CACHE_KEYS } from '../../services/cache.service';
 
 interface Notice {
   id: string;
@@ -28,6 +29,8 @@ const AvisosImportantes: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showOnlyUnread, setShowOnlyUnread] = useState(false);
   const [expandedNotices, setExpandedNotices] = useState<Set<string>>(new Set());
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Dados simulados de avisos
   const initialNotices: Notice[] = [
@@ -109,14 +112,38 @@ const AvisosImportantes: React.FC = () => {
   ];
 
   useEffect(() => {
-    // Carregar avisos e status de leitura do localStorage
-    const savedReadNotices = localStorage.getItem('read_notices');
-    if (savedReadNotices) {
-      setReadNotices(new Set(JSON.parse(savedReadNotices)));
-    }
-    
-    // Simular carregamento de avisos
-    setNotices(initialNotices);
+    const loadData = async () => {
+      setIsLoading(true);
+      
+      try {
+        // Load notices with cache (6 hours TTL)
+        const cachedNotices = await cacheService.getOrFetch<Notice[]>(
+          CACHE_KEYS.NOTICES,
+          async () => {
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 100));
+            return initialNotices;
+          },
+          6 * 60 * 60 * 1000 // 6 hours
+        );
+
+        // Carregar avisos e status de leitura do localStorage
+        const savedReadNotices = localStorage.getItem('read_notices');
+        if (savedReadNotices) {
+          setReadNotices(new Set(JSON.parse(savedReadNotices)));
+        }
+        
+        setNotices(cachedNotices);
+      } catch (error) {
+        console.error('Error loading notices:', error);
+        // Fallback to initial data
+        setNotices(initialNotices);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
 
   const categories = [
@@ -191,6 +218,15 @@ const AvisosImportantes: React.FC = () => {
   if (showOnlyUnread) {
     filteredNotices = filteredNotices.filter(n => !readNotices.has(n.id));
   }
+  
+  if (searchTerm.trim()) {
+    const term = searchTerm.toLowerCase();
+    filteredNotices = filteredNotices.filter(n => 
+      n.title.toLowerCase().includes(term) || 
+      n.content.toLowerCase().includes(term) ||
+      n.author.toLowerCase().includes(term)
+    );
+  }
 
   // Ordenar: fixados primeiro, depois por data
   filteredNotices.sort((a, b) => {
@@ -200,6 +236,19 @@ const AvisosImportantes: React.FC = () => {
   });
 
   const unreadCount = notices.filter(n => !readNotices.has(n.id)).length;
+
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Carregando avisos...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -248,8 +297,28 @@ const AvisosImportantes: React.FC = () => {
             ))}
           </div>
 
-          {/* Actions */}
+          {/* Search and Actions */}
           <div className="flex items-center gap-4">
+            {/* Search Input */}
+            <div className="relative">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Buscar avisos..."
+                className="pl-8 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-terracota focus:border-transparent"
+              />
+              <span className="absolute left-2.5 top-2.5 text-gray-400 text-sm">🔍</span>
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-2.5 top-2.5 text-gray-400 hover:text-gray-600"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+            
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -270,6 +339,39 @@ const AvisosImportantes: React.FC = () => {
             )}
           </div>
         </div>
+        
+        {/* Search Results Info */}
+        {(searchTerm || showOnlyUnread || selectedCategory !== 'all') && (
+          <div className="flex items-center justify-between mt-4 pt-3 border-t">
+            <div className="text-sm text-gray-600">
+              {filteredNotices.length} {filteredNotices.length === 1 ? 'aviso encontrado' : 'avisos encontrados'}
+              {searchTerm && (
+                <span className="font-medium"> para "{searchTerm}"</span>
+              )}
+              {showOnlyUnread && (
+                <span className="ml-1 text-orange-600">• Apenas não lidos</span>
+              )}
+              {selectedCategory !== 'all' && (
+                <span className="ml-1 text-terracota">
+                  • {categories.find(c => c.value === selectedCategory)?.label}
+                </span>
+              )}
+            </div>
+            
+            {(searchTerm || showOnlyUnread || selectedCategory !== 'all') && (
+              <button
+                onClick={() => {
+                  setSearchTerm('');
+                  setShowOnlyUnread(false);
+                  setSelectedCategory('all');
+                }}
+                className="text-sm text-gray-500 hover:text-terracota"
+              >
+                Limpar filtros
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Notices List */}

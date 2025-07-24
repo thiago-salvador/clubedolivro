@@ -1,1 +1,10 @@
+# Netlify redirects for SPA - Clube do Livro
 /*    /index.html   200
+
+# Redirects para URLs antigas/compatibilidade
+/alunas/*  /aluna/:splat  301
+
+# Headers de segurança via redirects (backup do netlify.toml)
+/security-test  /index.html  200
+  X-Frame-Options: DENY
+  X-XSS-Protection: 1; mode=block

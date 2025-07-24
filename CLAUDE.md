@@ -1,99 +1,122 @@
-# 🎯 MAPA COMPLETO DO SITE - CLUBE DO LIVRO
+# CLAUDE.md
 
-## 1️⃣ PÁGINAS PÚBLICAS
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-### 🏠 Landing Page (/)
-- Hero Section (com botão "QUERO PARTICIPAR")
-- Sobre o Clube
-- O que te Espera (com botão "Quero Participar")
-- Benefícios e Parceiros
+## 🚀 Development Commands
 
-### 🔑 Login (/login)
+```bash
+# Install dependencies
+npm install
 
-### 💳 Página de Vendas/Checkout ........... ✅ IMPLEMENTADA E FUNCIONANDO
-- Página de apresentação do produto com benefícios
-- Formulário de checkout com validações (CPF, telefone, email)
-- Máscaras de formatação automática
-- Página de confirmação de pagamento
-- Botões "QUERO PARTICIPAR" conectados e funcionais
-- Fluxo completo testado e operacional
+# Start development server (runs on localhost:3000)
+npm start
 
-## 2️⃣ ÁREA DA ALUNA (/aluna)
+# Build for production
+npm run build
 
-### MENU COMPLETO COM STATUS:
+# Build optimized for Netlify deployment
+npm run build:netlify
 
-```
-┌─────────────────────────────┐
-│ ÁREA DA ALUNA               │
-├─────────────────────────────┤
-│ 🏠 Início                   │ ✅ Dashboard implementado
-├─────────────────────────────┤
-│ 💬 Comunidade               │ ✅ Feed + Nova postagem
-├─────────────────────────────┤
-│ ▶ Aulas                     │
-│   ├─ Capítulo 1             │ ✅ Overview + 4 tipos de conteúdo
-│   ├─ Capítulo 2             │ ✅ Overview + 4 tipos de conteúdo
-│   ├─ Capítulo 3             │ ✅ Overview + 4 tipos de conteúdo
-│   ├─ Capítulo 4             │ ✅ Overview + 4 tipos de conteúdo
-│   └─ Capítulo 5             │ ✅ Overview + 4 tipos de conteúdo
-│                             │
-│   Cada capítulo tem:        │
-│   ├─ 🎵 Música              │ ✅ Player implementado
-│   ├─ 📹 Vídeo Aula          │ ✅ Player + lista
-│   ├─ ✍️ Exercício           │ 🚧 Rota existe, sem conteúdo
-│   └─ 💬 Encontros           │ 🚧 Rota existe, sem conteúdo
-├─────────────────────────────┤
-│ ▶ Debates                   │
-│   ├─ 📚 Indicações          │ ✅ Feed + formulário
-│   ├─ 💕 Relacionamento      │ ✅ Feed + anônimo + threading
-│   ├─ 💼 Trabalho            │ ❌ Não implementada
-│   └─ 👭 Amizade             │ ❌ Não implementada
-├─────────────────────────────┤
-│ 📌 Avisos Importantes       │ ❌ Não implementada
-├─────────────────────────────┤
-│ 🔗 Links Úteis              │ ❌ Não implementada
-├─────────────────────────────┤
-│ ⚙️ Configurações            │ ❌ Não implementada
-└─────────────────────────────┘
+# Run tests in watch mode
+npm test
+
+# Run a single test file
+npm test -- path/to/test.test.tsx --watchAll=false
 ```
 
-## 3️⃣ COMPONENTES ESPECIAIS
+## 🏗️ Architecture Overview
 
-- 🎧 Podcast Player (Modal) ............ ✅ Implementado
-- 📝 Modal Nova Postagem ............... ✅ Implementado
+### Tech Stack
+- **React 18** with TypeScript
+- **React Router v6** for routing
+- **Tailwind CSS** for styling with custom color palette
+- **Context API** for state management (Auth, Theme)
+- **Lucide React** and **React Icons** for icons
+- **date-fns** for date formatting
+- **Create React App** as build tool
 
-## 📊 RESUMO FINAL DO STATUS
+### Project Structure
+```
+clube-do-livro/
+├── src/
+│   ├── components/          # Reusable components
+│   │   ├── aluna/          # Student area components
+│   │   ├── auth/           # Auth-related components
+│   │   ├── layout/         # Landing page sections
+│   │   └── ui/             # Generic UI components
+│   ├── contexts/           # React Context providers
+│   ├── pages/              # Page components
+│   │   └── aluna/          # Student area pages
+│   ├── services/           # Business logic & API services
+│   ├── types/              # TypeScript type definitions
+│   └── utils/              # Helper functions and utilities
+├── public/                 # Static assets
+└── docs/                   # Documentation
+```
 
-### ✅ IMPLEMENTADAS: 15 páginas/componentes
-- Landing Page
-- Login  
-- Checkout (com apresentação do produto)
-- Página de Confirmação de Pagamento
-- Dashboard
-- Comunidade
-- 5 páginas de Capítulos
-- 2 tipos de conteúdo (Vídeo, Música)
-- 2 páginas de Debates (Indicações, Relacionamento)
+### Key Architectural Patterns
 
-### 🚧 PARCIALMENTE IMPLEMENTADAS: 2 funcionalidades
-- Exercícios Terapêuticos
-- Encontros Participativos
+1. **Lazy Loading**: Most pages use React.lazy() for code splitting (see `src/utils/lazyImports.ts`)
+2. **Protected Routes**: Auth-based route protection via `ProtectedRoute` component
+3. **Theme System**: Dark mode support with ThemeContext and Tailwind's darkMode class
+4. **Responsive Design**: Mobile-first approach with Tailwind breakpoints
+5. **Service Layer**: Business logic separated into service files
 
-### ❌ NÃO IMPLEMENTADAS: 4 páginas
-- Debates: Trabalho
-- Debates: Amizade  
+### Core Services
+- `auth.service.ts` - Authentication logic
+- `payment.service.ts` - Payment processing
+- `storage.service.ts` - Local storage management
+- `email.service.ts` - Email notifications
+- `whatsapp.service.ts` - WhatsApp integration
+
+## 🎯 Current Application Status
+
+### Public Pages
+- **Landing Page** (`/`) - Complete with multiple sections
+- **Login** (`/login`) - Implemented
+- **Checkout** (`/checkout`) - Fully functional with validations
+
+### Student Area (`/aluna`)
+- **Dashboard** - Implemented
+- **Community** - Feed + New post functionality
+- **Lessons** - 5 chapters with video/audio content
+- **Debates** - Indicações and Relacionamento sections done
+
+### Pending Implementation
+- Debates: Trabalho, Amizade
 - Avisos Importantes
-- Links Úteis
+- Links Úteis  
 - Configurações
+- Exercise and Meeting content for lessons
 
-### 🟢 FLUXO CORRIGIDO E FUNCIONANDO:
-Os botões "QUERO PARTICIPAR" e "Quero Participar" na landing page agora levam para a página de checkout!
-Checkout está totalmente funcional com validações e máscaras.
+## 🎨 Design System
 
-### 🎨 MELHORIAS VISUAIS IMPLEMENTADAS:
-- Seção de Benefícios e Parceiros agora com imagens reais de produtos
-- Cards de produtos com fotos profissionais de cosméticos e bem-estar
-- Efeitos hover e transições suaves
-- Tags de desconto destacadas
+### Custom Colors (Tailwind Config)
+- **terracota**: Main brand color (#B8654B)
+- **bege-claro**: Light background (#F5E6D3)
+- **verde-oliva**: Olive green accent
+- **verde-floresta**: Forest green accent
+- **dourado**: Gold accent
+- **marrom-escuro**: Dark brown (#4D381B)
 
-Total de rotas/páginas: 21 (15 prontas + 2 parciais + 4 pendentes)
+### Fonts
+- **Serif**: Cormorant Garamond (elegant headers)
+- **Sans**: Montserrat (body text)
+
+## 🚢 Deployment
+
+The app is configured for Netlify deployment:
+- Build command: `npm run build:netlify`
+- Publish directory: `build`
+- Node version: 18
+- Includes performance optimizations and security headers
+- SPA redirects configured
+
+## 📝 Important Notes
+
+1. **Authentication**: Uses context-based auth with protected routes
+2. **Responsive**: Ensure all new components follow mobile-first approach
+3. **Accessibility**: Use proper ARIA labels and semantic HTML
+4. **Performance**: Leverage lazy loading for new pages
+5. **Styling**: Use existing Tailwind classes and custom color palette
+6. **State Management**: Use existing contexts or create new ones as needed

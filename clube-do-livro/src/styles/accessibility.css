@@ -1,0 +1,118 @@
+/* Estilos de acessibilidade e contraste melhorado */
+
+/* Garantir contraste mínimo em textos */
+.text-gray-400 {
+  color: #6b7280 !important; /* gray-500 para melhor contraste */
+}
+
+.text-gray-500 {
+  color: #4b5563 !important; /* gray-600 para melhor contraste */
+}
+
+/* Links com contraste adequado */
+a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* Botões com melhor contraste */
+.bg-terracota {
+  background-color: #96533C !important; /* Usar versão mais escura */
+}
+
+.text-terracota {
+  color: #7A4330 !important; /* Usar versão mais escura para texto */
+}
+
+/* Estados de foco mais visíveis */
+:focus {
+  outline: 2px solid #7A4330 !important;
+  outline-offset: 2px !important;
+}
+
+:focus:not(:focus-visible) {
+  outline: none !important;
+}
+
+:focus-visible {
+  outline: 2px solid #7A4330 !important;
+  outline-offset: 2px !important;
+}
+
+/* Melhorar contraste em placeholders */
+::placeholder {
+  color: #6b7280 !important; /* gray-500 */
+  opacity: 1 !important;
+}
+
+/* Garantir contraste em elementos desabilitados */
+:disabled {
+  opacity: 0.7 !important;
+  cursor: not-allowed !important;
+}
+
+/* Melhorar visibilidade de bordas */
+.border-gray-200 {
+  border-color: #d1d5db !important; /* gray-300 */
+}
+
+.border-gray-300 {
+  border-color: #9ca3af !important; /* gray-400 */
+}
+
+/* Textos em fundos escuros */
+.bg-terracota *,
+.bg-marrom-escuro *,
+.bg-verde-oliva *,
+.bg-verde-floresta * {
+  color: #f9fafb !important; /* gray-50 para contraste */
+}
+
+/* Badges e tags com melhor contraste */
+.bg-red-100 {
+  background-color: #fee2e2 !important;
+  color: #991b1b !important; /* red-800 */
+}
+
+.bg-yellow-100 {
+  background-color: #fef3c7 !important;
+  color: #92400e !important; /* yellow-800 */
+}
+
+.bg-green-100 {
+  background-color: #d1fae5 !important;
+  color: #065f46 !important; /* green-800 */
+}
+
+.bg-blue-100 {
+  background-color: #dbeafe !important;
+  color: #1e3a8a !important; /* blue-800 */
+}
+
+/* Cards e containers com bordas mais visíveis */
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Modo de alto contraste */
+@media (prefers-contrast: high) {
+  * {
+    border-width: 2px !important;
+  }
+  
+  .text-gray-600 {
+    color: #1f2937 !important; /* gray-800 */
+  }
+  
+  .bg-gray-50 {
+    background-color: #ffffff !important;
+  }
+  
+  .bg-gray-100 {
+    background-color: #f3f4f6 !important;
+  }
+}

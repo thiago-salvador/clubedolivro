@@ -123,122 +123,103 @@ const EnrollSection: React.FC = () => {
   };
 
   return (
-    <section className="relative w-full py-16 lg:py-24 px-6 lg:px-8" style={{ backgroundColor: '#F5F5DC' }}>
+    <section id="inscricao" className="relative w-full py-16 lg:py-24 px-6 lg:px-8" style={{ backgroundColor: '#F5F5DC' }}>
       <div className="max-w-7xl mx-auto">
         {/* Título */}
         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-elegant font-light text-gray-900 text-center mb-12">
           Inscreva-se no Clube
         </h2>
 
-        {/* Grid de 3 colunas */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-          {/* Card Clube Completo */}
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 relative">
-            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#B8860B] text-white px-4 py-1 rounded-full text-sm font-sans font-medium">
-              MAIS POPULAR
+        {/* Oferta Única Centralizada */}
+        <div className="max-w-2xl mx-auto mb-8">
+          <div className="bg-white rounded-xl shadow-xl p-8 border-2 border-[#B8860B] relative">
+            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#B8860B] text-white px-6 py-1 rounded-full text-sm font-sans font-medium animate-pulse">
+              OFERTA ESPECIAL
             </div>
-            <h3 className="text-2xl font-sans font-bold text-gray-900 mb-4 text-center">
-              Clube Completo
+            
+            <h3 className="text-3xl font-elegant font-semibold text-gray-900 mb-8 text-center">
+              Clube do Livro - Jornada Completa
             </h3>
-            <div className="border-b border-gray-200 mb-4"></div>
-            <ul className="space-y-3 mb-6">
-              <li className="flex items-start">
-                <Check className="w-5 h-5 text-[#B8860B] mr-2 flex-shrink-0 mt-0.5" />
-                <span className="text-gray-700 font-sans text-sm">Box com 12 livros selecionados</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="w-5 h-5 text-[#B8860B] mr-2 flex-shrink-0 mt-0.5" />
-                <span className="text-gray-700 font-sans text-sm">Grupo no WhatsApp com a Manu</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="w-5 h-5 text-[#B8860B] mr-2 flex-shrink-0 mt-0.5" />
-                <span className="text-gray-700 font-sans text-sm">Acesso completo à plataforma</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="w-5 h-5 text-[#B8860B] mr-2 flex-shrink-0 mt-0.5" />
-                <span className="text-gray-700 font-sans text-sm">Todos os benefícios inclusos</span>
-              </li>
-            </ul>
-            <div className="text-center mb-6">
-              <p className="text-sm text-gray-600 font-sans">Por apenas</p>
-              <p className="text-3xl font-bold text-gray-900 font-sans">
-                12x R$82,20
-              </p>
-              <p className="text-sm text-gray-500 font-sans">ou R$986,40 à vista</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+              {/* Coluna Esquerda */}
+              <div className="space-y-3">
+                <h4 className="font-sans font-semibold text-gray-800 mb-3">Incluso no seu acesso:</h4>
+                <ul className="space-y-2">
+                  <li className="flex items-start">
+                    <Check className="w-5 h-5 text-[#B8860B] mr-2 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-700 font-sans text-sm">17 semanas de leitura</span>
+                  </li>
+                  <li className="flex items-start">
+                    <Check className="w-5 h-5 text-[#B8860B] mr-2 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-700 font-sans text-sm">17 vídeo aula com análises de cada capítulo</span>
+                  </li>
+                  <li className="flex items-start">
+                    <Check className="w-5 h-5 text-[#B8860B] mr-2 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-700 font-sans text-sm">17 exercícios terapêuticos</span>
+                  </li>
+                  <li className="flex items-start">
+                    <Check className="w-5 h-5 text-[#B8860B] mr-2 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-700 font-sans text-sm">17 músicas pra provocar cada etapa da leitura</span>
+                  </li>
+                </ul>
+              </div>
+              
+              {/* Coluna Direita */}
+              <div className="space-y-3">
+                <h4 className="font-sans font-semibold text-gray-800 mb-3 md:mt-0 mt-4">Benefícios exclusivos:</h4>
+                <ul className="space-y-2">
+                  <li className="flex items-start">
+                    <Check className="w-5 h-5 text-[#B8860B] mr-2 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-700 font-sans text-sm">17 encontros online interativos e ao vivo</span>
+                  </li>
+                  <li className="flex items-start">
+                    <Check className="w-5 h-5 text-[#B8860B] mr-2 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-700 font-sans text-sm">Comunidade exclusiva de alunas</span>
+                  </li>
+                  <li className="flex items-start">
+                    <Check className="w-5 h-5 text-[#B8860B] mr-2 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-700 font-sans text-sm">Área com descontos de marcas parceiras</span>
+                  </li>
+                  <li className="flex items-start">
+                    <Check className="w-5 h-5 text-[#B8860B] mr-2 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-700 font-sans text-sm">2 anos de acesso ao conteúdo</span>
+                  </li>
+                  <li className="flex items-start">
+                    <Check className="w-5 h-5 text-[#B8860B] mr-2 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-700 font-sans text-sm">Certificado de conclusão</span>
+                  </li>
+                </ul>
+              </div>
             </div>
+            
+            <div className="border-t border-gray-200 pt-6 mb-6">
+              <div className="text-center">
+                <p className="text-sm text-gray-600 font-sans mb-2">Investimento</p>
+                <p className="text-4xl font-bold text-gray-900 font-sans mb-2">
+                  12x R$65,05
+                </p>
+                <p className="text-base text-gray-500 font-sans">ou R$629,00 à vista</p>
+              </div>
+            </div>
+            
             <button
               onClick={() => handlePlanSelect('complete')}
-              className={`w-full bg-[#B8860B] hover:bg-[#8B6914] text-white font-sans font-semibold py-3 px-6 rounded-full transition-all duration-300 hover:scale-105 hover:shadow-xl flex items-center justify-center ${
-                selectedPlan === 'complete' ? 'ring-4 ring-[#B8860B] ring-opacity-50' : ''
-              }`}
+              className="w-full bg-[#B8860B] hover:bg-[#8B6914] text-white font-sans font-semibold py-4 px-8 rounded-full transition-all duration-300 hover:scale-105 hover:shadow-xl text-lg flex items-center justify-center"
             >
-              Garanta aqui
-              <ChevronDown className="ml-2 w-5 h-5" />
+              Garanta sua vaga
+              <ChevronDown className={`ml-2 w-5 h-5 transition-transform ${showCheckout && selectedPlan === 'complete' ? 'rotate-180' : ''}`} />
             </button>
-          </div>
-
-          {/* Card Clube sem Livros */}
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-            <h3 className="text-2xl font-sans font-bold text-gray-900 mb-4 text-center">
-              Clube sem Livros*
-            </h3>
-            <div className="border-b border-gray-200 mb-4"></div>
-            <ul className="space-y-3 mb-6">
-              <li className="flex items-start">
-                <Check className="w-5 h-5 text-[#B8860B] mr-2 flex-shrink-0 mt-0.5" />
-                <span className="text-gray-700 font-sans text-sm">Grupo no WhatsApp com a Manu</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="w-5 h-5 text-[#B8860B] mr-2 flex-shrink-0 mt-0.5" />
-                <span className="text-gray-700 font-sans text-sm">Acesso completo à plataforma</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="w-5 h-5 text-[#B8860B] mr-2 flex-shrink-0 mt-0.5" />
-                <span className="text-gray-700 font-sans text-sm">Todos os benefícios digitais</span>
-              </li>
-              <li className="text-gray-500 font-sans text-sm italic">
-                *Você compra os livros por conta própria
-              </li>
-            </ul>
-            <div className="text-center mb-6">
-              <p className="text-sm text-gray-600 font-sans">Por apenas</p>
-              <p className="text-3xl font-bold text-gray-900 font-sans">
-                12x R$49,90
-              </p>
-              <p className="text-sm text-gray-500 font-sans">ou R$598,80 à vista</p>
-            </div>
-            <button
-              onClick={() => handlePlanSelect('no-books')}
-              className={`w-full bg-white hover:bg-gray-100 text-black font-sans font-semibold py-3 px-6 rounded-full transition-all duration-300 hover:scale-105 hover:shadow-xl border-2 border-[#B8860B] hover:border-[#8B6914] flex items-center justify-center ${
-                selectedPlan === 'no-books' ? 'ring-4 ring-[#B8860B] ring-opacity-50' : ''
-              }`}
-            >
-              Garanta aqui
-              <ChevronDown className="ml-2 w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Lista de Benefícios */}
-          <div className="bg-gray-50 rounded-xl p-6">
-            <h3 className="text-xl font-sans font-bold text-gray-900 mb-4">
-              O que está incluso:
-            </h3>
-            <ul className="space-y-2">
-              {benefits.map((benefit, index) => (
-                <li key={index} className="flex items-start">
-                  <Check className="w-5 h-5 text-[#B8860B] mr-2 flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-700 font-sans text-sm">{benefit}</span>
-                </li>
-              ))}
-            </ul>
           </div>
         </div>
 
-        {/* Área de Checkout Expansível */}
-        {showCheckout && selectedPlan && (
-          <div className="bg-white rounded-xl shadow-xl p-8 border border-gray-200 transition-all duration-300 transform"
+        {/* Área de Checkout Expansível com Efeito Acordeão */}
+        <div className={`mx-auto max-w-2xl overflow-hidden transition-all duration-500 ease-in-out ${
+          showCheckout && selectedPlan ? 'max-h-[2000px] opacity-100 mt-8' : 'max-h-0 opacity-0'
+        }`}>
+          <div className="bg-white rounded-xl shadow-xl p-8 border border-gray-200 transform transition-transform duration-300"
                style={{
-                 animation: 'fadeIn 0.3s ease-out'
+                 boxShadow: '0 20px 40px -15px rgba(0, 0, 0, 0.2)'
                }}>
             <h3 className="text-2xl font-sans font-bold text-gray-900 mb-6">
               Finalizar compra - {selectedPlan === 'complete' ? 'Clube Completo' : 'Clube sem Livros'}
@@ -401,13 +382,13 @@ const EnrollSection: React.FC = () => {
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B8860B] focus:border-transparent font-sans"
                     >
                       <option value="1">
-                        À vista - R${selectedPlan === 'complete' ? '986,40' : '598,80'}
+                        À vista - R${selectedPlan === 'complete' ? '629,00' : '598,80'}
                       </option>
                       {[...Array(12)].map((_, i) => (
                         <option key={i + 2} value={i + 2}>
                           {i + 2}x de R$
                           {selectedPlan === 'complete' 
-                            ? (986.40 / (i + 2)).toFixed(2)
+                            ? (629.00 / (i + 2)).toFixed(2)
                             : (598.80 / (i + 2)).toFixed(2)
                           }
                         </option>
@@ -424,7 +405,7 @@ const EnrollSection: React.FC = () => {
                     Ao clicar em "Finalizar compra", você será direcionado para a tela de pagamento via Pix.
                   </p>
                   <p className="text-sm font-sans text-gray-600">
-                    Valor: R${selectedPlan === 'complete' ? '986,40' : '598,80'} à vista
+                    Valor: R${selectedPlan === 'complete' ? '629,00' : '598,80'} à vista
                   </p>
                 </div>
               )}
@@ -436,17 +417,30 @@ const EnrollSection: React.FC = () => {
               >
                 Finalizar compra
               </button>
+
+              {/* Sinais de Confiança */}
+              <div className="flex items-center justify-center gap-6 mt-6">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" alt="Visa" className="h-8 opacity-60" />
+                <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-8 opacity-60" />
+                <img src="https://logodownload.org/wp-content/uploads/2020/02/pix-bc-logo.png" alt="Pix" className="h-8 opacity-60" />
+              </div>
+              
+              <p className="text-center text-sm text-gray-500 mt-4">
+                🔒 Pagamento 100% seguro
+              </p>
             </form>
           </div>
-        )}
+        </div>
 
         {/* WhatsApp */}
         <div className="text-center mt-12">
           <button
             onClick={openWhatsApp}
-            className="inline-flex items-center text-gray-700 hover:text-[#B8860B] font-sans font-medium transition-colors"
+            className="inline-flex items-center bg-green-500 hover:bg-green-600 text-white font-sans font-semibold px-8 py-4 rounded-full transition-all duration-300 hover:scale-105 shadow-lg"
           >
-            <MessageCircle className="w-5 h-5 mr-2" />
+            <svg className="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+            </svg>
             Ficou com alguma dúvida? Fale conosco no WhatsApp
           </button>
         </div>

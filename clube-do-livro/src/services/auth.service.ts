@@ -1,6 +1,22 @@
 // Simulação de um serviço de autenticação real
 // Este arquivo pode ser facilmente substituído por chamadas de API reais
 
+import { User, UserRole } from '../types';
+
+// Helper function to convert string to UserRole
+const stringToUserRole = (role: string): UserRole => {
+  switch (role) {
+    case 'super_admin':
+      return UserRole.SUPER_ADMIN;
+    case 'admin':
+      return UserRole.ADMIN;
+    case 'aluna':
+      return UserRole.ALUNA;
+    default:
+      return UserRole.ALUNA;
+  }
+};
+
 interface LoginCredentials {
   email: string;
   password: string;
@@ -18,6 +34,7 @@ interface AuthResponse {
     name: string;
     email: string;
     avatar?: string;
+    role: string;
   };
   accessToken: string;
   refreshToken: string;
@@ -41,7 +58,17 @@ const USERS_DB = [
     password: 'senha123', // Em produção, seria um hash
     cpf: '123.456.789-00',
     phone: '(11) 98765-4321',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150'
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+    role: 'aluna'
+  },
+  {
+    id: '2',
+    name: 'Admin Sistema',
+    email: 'admin@clubedolivro.com',
+    password: 'admin123',
+    cpf: '987.654.321-00',
+    phone: '(11) 99999-9999',
+    role: 'super_admin'
   }
 ];
 
@@ -105,7 +132,8 @@ export const authService = {
         id: user.id,
         name: user.name,
         email: user.email,
-        avatar: user.avatar
+        avatar: user.avatar,
+        role: user.role
       },
       accessToken,
       refreshToken
@@ -129,7 +157,8 @@ export const authService = {
       password: data.password,
       cpf: data.cpf,
       phone: data.phone,
-      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&background=E07A5F&color=fff`
+      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&background=E07A5F&color=fff`,
+      role: 'aluna' // Por padrão, novos usuários são alunas
     };
     
     USERS_DB.push(newUser);
@@ -142,7 +171,8 @@ export const authService = {
         id: newUser.id,
         name: newUser.name,
         email: newUser.email,
-        avatar: newUser.avatar
+        avatar: newUser.avatar,
+        role: newUser.role
       },
       accessToken,
       refreshToken
@@ -203,7 +233,8 @@ export const authService = {
         id: user.id,
         name: user.name,
         email: user.email,
-        avatar: user.avatar
+        avatar: user.avatar,
+        role: user.role
       }
     };
   },
@@ -266,5 +297,23 @@ export const authService = {
     delete RESET_TOKENS_DB[data.token];
     
     return { success: true };
+  },
+
+  // Get user by email (for webhook integration)
+  getUserByEmail(email: string): User | null {
+    const dbUser = USERS_DB.find(u => u.email === email);
+    if (!dbUser) return null;
+
+    // Convert from DB format to User interface
+    return {
+      id: dbUser.id,
+      name: dbUser.name,
+      email: dbUser.email,
+      avatar: dbUser.avatar,
+      role: stringToUserRole(dbUser.role),
+      badges: [],
+      joinedDate: new Date('2024-01-01'), // Default date for existing users
+      previousParticipations: []
+    };
   }
 };

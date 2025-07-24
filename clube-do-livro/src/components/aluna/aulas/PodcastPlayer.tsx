@@ -9,6 +9,7 @@ interface PodcastPlayerProps {
     coverImage: string;
     audioUrl: string;
     duration: string;
+    thumbnail?: string;
   };
 }
 
@@ -16,6 +17,7 @@ const PodcastPlayer: React.FC<PodcastPlayerProps> = ({ isOpen, onClose, episode 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [playbackRate, setPlaybackRate] = useState(1);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
@@ -74,6 +76,19 @@ const PodcastPlayer: React.FC<PodcastPlayerProps> = ({ isOpen, onClose, episode 
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
+  const changePlaybackRate = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const rates = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+    const currentIndex = rates.indexOf(playbackRate);
+    const nextIndex = (currentIndex + 1) % rates.length;
+    const newRate = rates[nextIndex];
+    
+    audio.playbackRate = newRate;
+    setPlaybackRate(newRate);
+  };
+
   const handleShare = async () => {
     // Implementação da funcionalidade de compartilhamento
     if (navigator.share) {
@@ -104,9 +119,32 @@ const PodcastPlayer: React.FC<PodcastPlayerProps> = ({ isOpen, onClose, episode 
           <XIcon size={20} />
         </button>
 
-        {/* Cover Image */}
-        <div className="mx-auto w-64 h-64 bg-gradient-to-br from-terracota to-marrom-escuro rounded-lg mb-6 flex items-center justify-center">
-          <span className="text-white text-6xl">🎧</span>
+        {/* Cover Image with Animated Equalizer */}
+        <div className="mx-auto w-64 h-64 rounded-lg mb-6 relative overflow-hidden">
+          {episode.thumbnail ? (
+            <img 
+              src={episode.thumbnail} 
+              alt={episode.title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-terracota to-marrom-escuro flex items-center justify-center">
+              <span className="text-white text-6xl">🎧</span>
+            </div>
+          )}
+          
+          {/* Animated Equalizer Overlay */}
+          {isPlaying && (
+            <div className="absolute bottom-0 left-0 right-0 bg-black/60 p-4 flex items-center justify-center gap-1">
+              <div className="w-1 bg-white animate-pulse" style={{ height: '20px', animationDelay: '0ms', animationDuration: '400ms' }}></div>
+              <div className="w-1 bg-white animate-pulse" style={{ height: '30px', animationDelay: '100ms', animationDuration: '600ms' }}></div>
+              <div className="w-1 bg-white animate-pulse" style={{ height: '25px', animationDelay: '200ms', animationDuration: '500ms' }}></div>
+              <div className="w-1 bg-white animate-pulse" style={{ height: '35px', animationDelay: '300ms', animationDuration: '700ms' }}></div>
+              <div className="w-1 bg-white animate-pulse" style={{ height: '28px', animationDelay: '400ms', animationDuration: '550ms' }}></div>
+              <div className="w-1 bg-white animate-pulse" style={{ height: '32px', animationDelay: '500ms', animationDuration: '650ms' }}></div>
+              <div className="w-1 bg-white animate-pulse" style={{ height: '24px', animationDelay: '600ms', animationDuration: '450ms' }}></div>
+            </div>
+          )}
         </div>
 
         {/* Title */}
@@ -135,7 +173,7 @@ const PodcastPlayer: React.FC<PodcastPlayerProps> = ({ isOpen, onClose, episode 
         </div>
 
         {/* Controls */}
-        <div className="flex items-center justify-center gap-6 mb-6">
+        <div className="flex items-center justify-center gap-4 mb-4">
           <button
             onClick={() => skipTime(-15)}
             className="p-3 hover:bg-gray-100 rounded-full transition-colors"
@@ -153,6 +191,16 @@ const PodcastPlayer: React.FC<PodcastPlayerProps> = ({ isOpen, onClose, episode 
             className="p-3 hover:bg-gray-100 rounded-full transition-colors"
           >
             <span className="text-2xl">⏭️</span>
+          </button>
+        </div>
+
+        {/* Playback Speed Control */}
+        <div className="flex justify-center mb-6">
+          <button
+            onClick={changePlaybackRate}
+            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium text-sm transition-colors"
+          >
+            Velocidade: {playbackRate}x
           </button>
         </div>
 

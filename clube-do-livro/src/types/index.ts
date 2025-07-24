@@ -9,6 +9,12 @@ export enum PostCategory {
   CELEBRACAO = 'celebracao'
 }
 
+export enum UserRole {
+  SUPER_ADMIN = 'super_admin',
+  ADMIN = 'admin',
+  ALUNA = 'aluna'
+}
+
 export interface CategoryConfig {
   id: PostCategory;
   label: string;
@@ -22,6 +28,7 @@ export interface User {
   name: string;
   email: string;
   avatar?: string;
+  role: UserRole;
   badges: Badge[];
   joinedDate: Date;
   previousParticipations?: string[];
@@ -47,6 +54,9 @@ export interface Post {
   shares: number;
   isPinned: boolean;
   createdAt: Date;
+  reactions?: {
+    [emoji: string]: string[]; // emoji -> array of user IDs
+  };
 }
 
 export interface Comment {

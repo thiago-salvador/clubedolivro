@@ -1,8 +1,29 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Crimson+Pro:wght@300;400;500;600&display=swap');
 
 .about-section {
   background-color: #F5F5DC;
   padding: 100px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.about-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 35px,
+      rgba(255,255,255,.05) 35px,
+      rgba(255,255,255,.05) 70px
+    );
+  opacity: 0.3;
+  pointer-events: none;
 }
 
 .about-container {
@@ -36,11 +57,15 @@
 }
 
 .about-column-right p {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Crimson Pro', serif;
   font-size: 1.25rem;
-  line-height: 1.8;
+  line-height: 1.7;
   color: #333333;
   margin-bottom: 2rem;
+  letter-spacing: 0.02em;
+  text-align: justify;
+  hyphens: auto;
+  font-weight: 400;
 }
 
 .about-column-right p:last-child {

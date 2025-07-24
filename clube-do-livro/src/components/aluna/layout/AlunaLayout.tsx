@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   BookIcon, 
@@ -10,9 +10,11 @@ import {
   MenuIcon,
   XIcon,
   SearchIcon,
-  HomeIcon
+  HomeIcon,
+  MessageCircleIcon
 } from '../../Icons';
 import { useAuth } from '../../../contexts/AuthContext';
+import FeedbackWidget from '../../ui/FeedbackWidget';
 
 const AlunaLayout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -20,7 +22,31 @@ const AlunaLayout: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const [expandedSections, setExpandedSections] = useState<string[]>(['aulas', 'debates']);
+  const [expandedSections, setExpandedSections] = useState<string[]>(['comece', 'aulas', 'debates']);
+  const [showNewUserIndicator, setShowNewUserIndicator] = useState(false);
+  const [isAvatarDropdownOpen, setIsAvatarDropdownOpen] = useState(false);
+
+  // Detectar se é nova aluna e controlar indicador
+  useEffect(() => {
+    const hasVisitedComece = localStorage.getItem('visited_comece_section');
+    const isNewUser = !hasVisitedComece;
+    setShowNewUserIndicator(isNewUser);
+  }, []);
+
+  // Fechar dropdown ao clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (isAvatarDropdownOpen && !target.closest('.avatar-dropdown-container')) {
+        setIsAvatarDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isAvatarDropdownOpen]);
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => 
@@ -28,6 +54,12 @@ const AlunaLayout: React.FC = () => {
         ? prev.filter(s => s !== section)
         : [...prev, section]
     );
+
+    // Se clicou na seção "Comece por Aqui", esconder o indicador
+    if (section === 'comece' && showNewUserIndicator) {
+      setShowNewUserIndicator(false);
+      localStorage.setItem('visited_comece_section', 'true');
+    }
   };
 
   type MenuLink = {
@@ -43,7 +75,7 @@ const AlunaLayout: React.FC = () => {
     label: string;
     icon: string;
     isExpanded: boolean;
-    subItems: { path: string; label: string }[];
+    subItems: { path: string; label: string; icon?: string; unreadCount?: number }[];
   };
 
   type MenuItem = MenuLink | MenuSection;
@@ -54,6 +86,19 @@ const AlunaLayout: React.FC = () => {
       path: '/aluna', 
       label: 'Início', 
       icon: 'home' 
+    },
+    {
+      type: 'section',
+      id: 'comece',
+      label: 'Comece por Aqui',
+      icon: 'activity',
+      isExpanded: expandedSections.includes('comece'),
+      subItems: [
+        { path: '/aluna/comece/boas-vindas', label: 'Boas-vindas' },
+        { path: '/aluna/comece/acordos', label: 'Acordos do Grupo' },
+        { path: '/aluna/comece/apresentacao', label: 'Apresentação' },
+        { path: '/aluna/comece/agenda', label: 'Agenda Pessoal' },
+      ]
     },
     {
       type: 'section',
@@ -73,13 +118,33 @@ const AlunaLayout: React.FC = () => {
       type: 'section',
       id: 'debates',
       label: 'Debates',
-      icon: 'users',
+      icon: 'message-circle',
       isExpanded: expandedSections.includes('debates'),
       subItems: [
-        { path: '/aluna/debates/indicacoes', label: 'Indicações' },
-        { path: '/aluna/debates/relacionamento', label: 'Relacionamento' },
-        { path: '/aluna/debates/trabalho', label: 'Trabalho' },
-        { path: '/aluna/debates/amizade', label: 'Amizade' },
+        { 
+          path: '/aluna/debates/indicacoes', 
+          label: 'Indicações',
+          icon: '💡',
+          unreadCount: 3
+        },
+        { 
+          path: '/aluna/debates/relacionamento', 
+          label: 'Relacionamento',
+          icon: '💕',
+          unreadCount: 7
+        },
+        { 
+          path: '/aluna/debates/trabalho', 
+          label: 'Trabalho',
+          icon: '💼',
+          unreadCount: 2
+        },
+        { 
+          path: '/aluna/debates/amizade', 
+          label: 'Amizade',
+          icon: '👭',
+          unreadCount: 5
+        },
       ]
     },
     { 
@@ -115,9 +180,9 @@ const AlunaLayout: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <header className="bg-white shadow-sm fixed top-0 left-0 right-0 z-40">
+      <header className="bg-white dark:bg-gray-800 shadow-sm fixed top-0 left-0 right-0 z-40">
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
@@ -127,49 +192,105 @@ const AlunaLayout: React.FC = () => {
               >
                 {isSidebarOpen ? <XIcon size={24} /> : <MenuIcon size={24} />}
               </button>
-              <h1 className="ml-4 text-xl font-semibold text-gray-900">Clube do Livro</h1>
+              <h1 className="ml-4 text-xl font-semibold text-gray-900 dark:text-white">Clube do Livro</h1>
             </div>
 
             <div className="flex items-center gap-6">
               {/* Search Bar */}
-              <div className="hidden md:flex items-center bg-gray-100 rounded-full px-4 py-2">
+              <div className="hidden md:flex items-center bg-gray-100 dark:bg-gray-700 rounded-full px-4 py-2">
                 <SearchIcon className="text-gray-500 mr-2" />
                 <input
                   type="text"
                   placeholder="Buscar..."
-                  className="bg-transparent outline-none text-sm w-64"
+                  className="bg-transparent outline-none text-sm w-64 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 />
               </div>
 
               {/* User Profile */}
-              <div className="flex items-center gap-3">
-                {user?.avatar ? (
-                  <img
-                    src={user.avatar}
-                    alt={user.name}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-terracota flex items-center justify-center text-white font-semibold">
-                    {user?.name?.charAt(0).toUpperCase() || 'A'}
-                  </div>
-                )}
-                <div className="hidden md:block">
-                  <p className="text-sm font-medium text-gray-900">{user?.name || 'Aluna'}</p>
-                  <p className="text-xs text-gray-500">Aluna</p>
-                </div>
+              <div className="relative avatar-dropdown-container">
                 <button
-                  onClick={async () => {
-                    await logout();
-                    navigate('/login');
-                  }}
-                  className="ml-4 text-gray-500 hover:text-gray-700 transition-colors"
-                  title="Sair"
+                  onClick={() => setIsAvatarDropdownOpen(!isAvatarDropdownOpen)}
+                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                  aria-label="Menu do usuário"
+                  aria-expanded={isAvatarDropdownOpen}
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  {user?.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt={user.name}
+                      className="w-10 h-10 rounded-full object-cover ring-2 ring-transparent hover:ring-terracota transition-all duration-200"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-terracota flex items-center justify-center text-white font-semibold ring-2 ring-transparent hover:ring-terracota/50 transition-all duration-200">
+                      {user?.name?.charAt(0).toUpperCase() || 'A'}
+                    </div>
+                  )}
+                  <div className="hidden md:block">
+                    <p className="text-sm font-medium text-gray-900">{user?.name || 'Aluna'}</p>
+                    <p className="text-xs text-gray-500">Aluna</p>
+                  </div>
+                  <svg
+                    className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
+                      isAvatarDropdownOpen ? 'rotate-180' : ''
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m19 9-7 7-7-7" />
                   </svg>
                 </button>
+
+                {/* Dropdown Menu */}
+                {isAvatarDropdownOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                    {/* Profile Header */}
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <div className="flex items-center gap-3">
+                        {user?.avatar ? (
+                          <img
+                            src={user.avatar}
+                            alt={user.name}
+                            className="w-12 h-12 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-full bg-terracota flex items-center justify-center text-white font-semibold">
+                            {user?.name?.charAt(0).toUpperCase() || 'A'}
+                          </div>
+                        )}
+                        <div>
+                          <p className="font-medium text-gray-900">{user?.name || 'Aluna'}</p>
+                          <p className="text-sm text-gray-500">{user?.email || ''}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Menu Items */}
+                    <div className="py-2">
+                      <Link
+                        to="/aluna/configuracoes"
+                        onClick={() => setIsAvatarDropdownOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <SettingsIcon size={18} className="text-gray-400" />
+                        <span>Meu Perfil</span>
+                      </Link>
+                      <button
+                        onClick={async () => {
+                          setIsAvatarDropdownOpen(false);
+                          await logout();
+                          navigate('/login');
+                        }}
+                        className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors w-full text-left"
+                      >
+                        <svg className="w-[18px] h-[18px] text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        <span>Sair</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -178,7 +299,7 @@ const AlunaLayout: React.FC = () => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-16 bottom-0 bg-white shadow-lg z-30 transition-transform duration-300 ${
+        className={`fixed left-0 top-16 bottom-0 bg-white dark:bg-gray-800 shadow-lg z-30 transition-transform duration-300 ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } md:translate-x-0 w-64`}
       >
@@ -201,6 +322,7 @@ const AlunaLayout: React.FC = () => {
                       {item.icon === 'home' && <HomeIcon className={active ? "text-white" : "text-gray-700"} />}
                       {item.icon === 'book' && <BookIcon className={active ? "text-white" : "text-gray-700"} />}
                       {item.icon === 'users' && <UsersIcon className={active ? "text-white" : "text-gray-700"} />}
+                      {item.icon === 'message-circle' && <MessageCircleIcon className={active ? "text-white" : "text-gray-700"} />}
                       {item.icon === 'activity' && <ActivityIcon className={active ? "text-white" : "text-gray-700"} />}
                       {item.icon === 'gift' && <GiftIcon className={active ? "text-white" : "text-gray-700"} />}
                       {item.icon === 'shopping-bag' && <ShoppingBagIcon className={active ? "text-white" : "text-gray-700"} />}
@@ -214,13 +336,30 @@ const AlunaLayout: React.FC = () => {
                   <li key={item.id}>
                     <button
                       onClick={() => toggleSection(item.id)}
-                      className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors relative ${
+                        item.id === 'comece' && showNewUserIndicator
+                          ? 'bg-gradient-to-r from-terracota/10 to-marrom-escuro/10 border-2 border-terracota/30 text-terracota'
+                          : 'text-gray-700 hover:bg-gray-100'
+                      }`}
                     >
                       <div className={`transition-transform ${item.isExpanded ? 'rotate-90' : ''}`}>
                         {item.icon === 'book' && <BookIcon className="text-gray-700" />}
                         {item.icon === 'users' && <UsersIcon className="text-gray-700" />}
+                        {item.icon === 'message-circle' && <MessageCircleIcon className="text-gray-700" />}
+                        {item.icon === 'activity' && <ActivityIcon className={item.id === 'comece' && showNewUserIndicator ? 'text-terracota' : 'text-gray-700'} />}
                       </div>
-                      <span className="font-medium">{item.label}</span>
+                      <span className={`font-medium ${item.id === 'comece' && showNewUserIndicator ? 'text-terracota' : ''}`}>
+                        {item.label}
+                      </span>
+                      {/* Indicador pulsante para novas alunas */}
+                      {item.id === 'comece' && showNewUserIndicator && (
+                        <div className="absolute -right-1 -top-1">
+                          <div className="relative">
+                            <div className="w-3 h-3 bg-terracota rounded-full animate-pulse"></div>
+                            <div className="absolute inset-0 w-3 h-3 bg-terracota rounded-full animate-ping opacity-75"></div>
+                          </div>
+                        </div>
+                      )}
                     </button>
                     {item.isExpanded && (
                       <ul className="ml-12 mt-2 space-y-1">
@@ -230,14 +369,31 @@ const AlunaLayout: React.FC = () => {
                             <li key={subItem.path}>
                               <Link
                                 to={subItem.path}
-                                onClick={() => setIsSidebarOpen(false)}
-                                className={`block px-4 py-2 rounded-lg transition-colors ${
+                                onClick={() => {
+                                  setIsSidebarOpen(false);
+                                  // Se clicou em um sub-item do "Comece por Aqui", esconder indicador
+                                  if (item.id === 'comece' && showNewUserIndicator) {
+                                    setShowNewUserIndicator(false);
+                                    localStorage.setItem('visited_comece_section', 'true');
+                                  }
+                                }}
+                                className={`flex items-center justify-between px-4 py-2 rounded-lg transition-colors ${
                                   subActive
                                     ? 'bg-terracota/20 text-terracota'
                                     : 'text-gray-600 hover:bg-gray-100'
                                 }`}
                               >
-                                {subItem.label}
+                                <div className="flex items-center gap-2">
+                                  {subItem.icon && (
+                                    <span className="text-sm">{subItem.icon}</span>
+                                  )}
+                                  <span>{subItem.label}</span>
+                                </div>
+                                {subItem.unreadCount && subItem.unreadCount > 0 && (
+                                  <span className="bg-terracota text-white text-xs px-2 py-1 rounded-full min-w-[20px] text-center">
+                                    {subItem.unreadCount > 99 ? '99+' : subItem.unreadCount}
+                                  </span>
+                                )}
                               </Link>
                             </li>
                           );
@@ -292,6 +448,9 @@ const AlunaLayout: React.FC = () => {
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
+
+      {/* Feedback Widget */}
+      <FeedbackWidget />
     </div>
   );
 };

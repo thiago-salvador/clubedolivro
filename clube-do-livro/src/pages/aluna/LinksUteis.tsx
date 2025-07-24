@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { cacheService, CACHE_KEYS } from '../../services/cache.service';
 
 interface Link {
   id: string;
@@ -20,6 +21,15 @@ const LinksUteis: React.FC = () => {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [clickCounts, setClickCounts] = useState<Record<string, number>>({});
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
+  const [isNewLinkModalOpen, setIsNewLinkModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [newLinkSuggestion, setNewLinkSuggestion] = useState({
+    title: '',
+    description: '',
+    url: '',
+    category: 'livro' as Link['category'],
+    tags: ''
+  });
 
   // Dados dos links úteis
   const initialLinks: Link[] = [
@@ -155,22 +165,47 @@ const LinksUteis: React.FC = () => {
   ];
 
   useEffect(() => {
-    // Carregar favoritos e contadores do localStorage
-    const savedFavorites = localStorage.getItem('link_favorites');
-    if (savedFavorites) {
-      setFavorites(new Set(JSON.parse(savedFavorites)));
-    }
+    const loadData = async () => {
+      setIsLoading(true);
+      
+      try {
+        // Load links with cache (3 days TTL)
+        const cachedLinks = await cacheService.getOrFetch<Link[]>(
+          CACHE_KEYS.LINKS,
+          async () => {
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 100));
+            return initialLinks;
+          },
+          3 * 24 * 60 * 60 * 1000 // 3 days
+        );
 
-    const savedCounts = localStorage.getItem('link_click_counts');
-    if (savedCounts) {
-      setClickCounts(JSON.parse(savedCounts));
-    }
+        // Carregar favoritos e contadores do localStorage
+        const savedFavorites = localStorage.getItem('link_favorites');
+        if (savedFavorites) {
+          setFavorites(new Set(JSON.parse(savedFavorites)));
+        }
 
-    // Inicializar links com contadores salvos
-    setLinks(initialLinks.map(link => ({
-      ...link,
-      clickCount: savedCounts ? JSON.parse(savedCounts)[link.id] || 0 : 0
-    })));
+        const savedCounts = localStorage.getItem('link_click_counts');
+        if (savedCounts) {
+          setClickCounts(JSON.parse(savedCounts));
+        }
+
+        // Inicializar links com contadores salvos
+        setLinks(cachedLinks.map(link => ({
+          ...link,
+          clickCount: savedCounts ? JSON.parse(savedCounts)[link.id] || 0 : 0
+        })));
+      } catch (error) {
+        console.error('Error loading links:', error);
+        // Fallback to initial data
+        setLinks(initialLinks);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
 
   const toggleFavorite = (linkId: string) => {
@@ -198,6 +233,42 @@ const LinksUteis: React.FC = () => {
         ? { ...link, clickCount: link.clickCount + 1 }
         : link
     ));
+  };
+
+  const handleSuggestLink = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validações
+    if (!newLinkSuggestion.title.trim() || !newLinkSuggestion.url.trim()) {
+      alert('Por favor, preencha pelo menos o título e a URL.');
+      return;
+    }
+
+    // Em produção, enviaria para o backend
+    console.log('Nova sugestão de link:', newLinkSuggestion);
+    
+    // Salvar sugestão no localStorage (simulando envio)
+    const savedSuggestions = JSON.parse(localStorage.getItem('link_suggestions') || '[]');
+    const suggestion = {
+      ...newLinkSuggestion,
+      id: Date.now().toString(),
+      submittedAt: new Date().toISOString(),
+      tags: newLinkSuggestion.tags.split(',').map(t => t.trim()).filter(Boolean)
+    };
+    savedSuggestions.push(suggestion);
+    localStorage.setItem('link_suggestions', JSON.stringify(savedSuggestions));
+    
+    // Reset form
+    setNewLinkSuggestion({
+      title: '',
+      description: '',
+      url: '',
+      category: 'livro',
+      tags: ''
+    });
+    setIsNewLinkModalOpen(false);
+    
+    alert('Obrigada pela sugestão! Ela será analisada pela equipe e poderá ser adicionada à biblioteca.');
   };
 
   // Filtrar links
@@ -232,6 +303,19 @@ const LinksUteis: React.FC = () => {
     const cat = categories.find(c => c.value === category);
     return cat?.icon || '🔗';
   };
+
+  if (isLoading) {
+    return (
+      <div className="max-w-6xl mx-auto">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Carregando recursos...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -277,23 +361,33 @@ const LinksUteis: React.FC = () => {
           ))}
         </div>
 
-        {/* Show Favorites Toggle */}
+        {/* Actions Row */}
         <div className="flex items-center justify-between">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={showOnlyFavorites}
-              onChange={(e) => setShowOnlyFavorites(e.target.checked)}
-              className="rounded text-terracota focus:ring-terracota"
-            />
-            <span className="text-sm text-gray-700">Mostrar apenas favoritos</span>
-          </label>
+          <div className="flex items-center gap-6">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showOnlyFavorites}
+                onChange={(e) => setShowOnlyFavorites(e.target.checked)}
+                className="rounded text-terracota focus:ring-terracota"
+              />
+              <span className="text-sm text-gray-700">Mostrar apenas favoritos</span>
+            </label>
+            
+            {favorites.size > 0 && (
+              <span className="text-sm text-gray-500">
+                {favorites.size} link{favorites.size > 1 ? 's' : ''} favoritado{favorites.size > 1 ? 's' : ''}
+              </span>
+            )}
+          </div>
           
-          {favorites.size > 0 && (
-            <span className="text-sm text-gray-500">
-              {favorites.size} link{favorites.size > 1 ? 's' : ''} favoritado{favorites.size > 1 ? 's' : ''}
-            </span>
-          )}
+          <button
+            onClick={() => setIsNewLinkModalOpen(true)}
+            className="px-4 py-2 bg-terracota text-white rounded-lg font-medium hover:bg-marrom-escuro transition-colors flex items-center gap-2"
+          >
+            <span>➕</span>
+            Sugerir Link
+          </button>
         </div>
       </div>
 
@@ -401,6 +495,115 @@ const LinksUteis: React.FC = () => {
           </li>
         </ul>
       </div>
+
+      {/* Modal Sugerir Novo Link */}
+      {isNewLinkModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-semibold text-gray-900">Sugerir Novo Link</h2>
+                <button
+                  onClick={() => setIsNewLinkModalOpen(false)}
+                  className="p-2 hover:bg-gray-100 rounded-full"
+                >
+                  ×
+                </button>
+              </div>
+
+              <form onSubmit={handleSuggestLink} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Título do Link *
+                  </label>
+                  <input
+                    type="text"
+                    value={newLinkSuggestion.title}
+                    onChange={(e) => setNewLinkSuggestion({...newLinkSuggestion, title: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-terracota focus:border-transparent"
+                    placeholder="Ex: TED Talk inspirador sobre feminino"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    URL *
+                  </label>
+                  <input
+                    type="url"
+                    value={newLinkSuggestion.url}
+                    onChange={(e) => setNewLinkSuggestion({...newLinkSuggestion, url: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-terracota focus:border-transparent"
+                    placeholder="https://..."
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Categoria
+                  </label>
+                  <select
+                    value={newLinkSuggestion.category}
+                    onChange={(e) => setNewLinkSuggestion({...newLinkSuggestion, category: e.target.value as Link['category']})}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-terracota focus:border-transparent"
+                  >
+                    {categories.filter(c => c.value !== 'all').map((cat) => (
+                      <option key={cat.value} value={cat.value}>
+                        {cat.icon} {cat.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Descrição
+                  </label>
+                  <textarea
+                    value={newLinkSuggestion.description}
+                    onChange={(e) => setNewLinkSuggestion({...newLinkSuggestion, description: e.target.value})}
+                    rows={3}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-terracota focus:border-transparent"
+                    placeholder="Descreva brevemente o conteúdo e por que é útil..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Tags (opcional)
+                  </label>
+                  <input
+                    type="text"
+                    value={newLinkSuggestion.tags}
+                    onChange={(e) => setNewLinkSuggestion({...newLinkSuggestion, tags: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-terracota focus:border-transparent"
+                    placeholder="Ex: autoestima, empoderamento, crescimento"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Separe as tags com vírgulas</p>
+                </div>
+
+                <div className="flex justify-end gap-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setIsNewLinkModalOpen(false)}
+                    className="px-6 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-terracota text-white rounded-lg hover:bg-marrom-escuro transition-colors"
+                  >
+                    Enviar Sugestão
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

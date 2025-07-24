@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { BookOpenIcon, UsersIcon } from '../../../components/Icons';
+import { useReadingProgress } from '../../../services/reading-progress.service';
+import SatisfactionSurvey from '../../../components/ui/SatisfactionSurvey';
 
 interface ContentCard {
   id: string;
@@ -13,6 +14,27 @@ interface ContentCard {
 const ChapterOverview: React.FC = () => {
   const navigate = useNavigate();
   const { chapterId } = useParams<{ chapterId: string }>();
+  const { markChapterAccessed, isContentCompleted } = useReadingProgress();
+  const [showChapterSurvey, setShowChapterSurvey] = useState(false);
+
+  // Rastrear acesso ao overview do capítulo
+  useEffect(() => {
+    if (chapterId) {
+      markChapterAccessed(parseInt(chapterId), 'overview');
+      
+      // Check if all content is completed and show survey
+      const chapterNum = parseInt(chapterId);
+      const contentTypes: ('video' | 'musica' | 'exercicio' | 'encontros')[] = ['video', 'musica', 'exercicio', 'encontros'];
+      const allCompleted = contentTypes.every(type => isContentCompleted(chapterNum, type));
+      
+      if (allCompleted) {
+        const lastSurvey = localStorage.getItem(`chapter_${chapterId}_survey`);
+        if (!lastSurvey) {
+          setShowChapterSurvey(true);
+        }
+      }
+    }
+  }, [chapterId, markChapterAccessed, isContentCompleted]);
 
   const contentCards: ContentCard[] = [
     {
@@ -90,15 +112,48 @@ const ChapterOverview: React.FC = () => {
       </div>
 
       {/* Progress Indicator */}
-      <div className="mt-12 bg-white rounded-xl p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-gray-900">Progresso do Capítulo</h3>
-          <span className="text-sm text-gray-600">2 de 4 conteúdos concluídos</span>
-        </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
-          <div className="bg-terracota rounded-full h-2" style={{ width: '50%' }} />
-        </div>
-      </div>
+      {chapterId && (() => {
+        const chapterNum = parseInt(chapterId);
+        const contentTypes: Array<'video' | 'musica' | 'exercicio' | 'encontros'> = ['video', 'musica', 'exercicio', 'encontros'];
+        const completedContent = contentTypes.filter(type => isContentCompleted(chapterNum, type));
+        const progressPercentage = (completedContent.length / contentTypes.length) * 100;
+        
+        return (
+          <div className="mt-12 bg-white rounded-xl p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">Progresso do Capítulo</h3>
+              <span className="text-sm text-gray-600">
+                {completedContent.length} de {contentTypes.length} conteúdos concluídos
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="bg-terracota rounded-full h-2 transition-all duration-300" style={{ width: `${progressPercentage}%` }} />
+            </div>
+            <div className="grid grid-cols-4 gap-2 mt-4">
+              {contentTypes.map((type) => (
+                <div key={type} className={`text-center p-2 rounded-lg text-xs ${
+                  isContentCompleted(chapterNum, type) 
+                    ? 'bg-green-100 text-green-700' 
+                    : 'bg-gray-100 text-gray-600'
+                }`}>
+                  {isContentCompleted(chapterNum, type) ? '✅' : '⏳'} {type}
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Chapter Satisfaction Survey */}
+      {showChapterSurvey && (
+        <SatisfactionSurvey 
+          surveyType="after_chapter" 
+          onClose={() => {
+            setShowChapterSurvey(false);
+            localStorage.setItem(`chapter_${chapterId}_survey`, new Date().toISOString());
+          }} 
+        />
+      )}
     </div>
   );
 };

@@ -10,11 +10,26 @@ interface Video {
   url: string;
 }
 
+interface Podcast {
+  id: string;
+  title: string;
+  thumbnail: string;
+  duration: string;
+  audioUrl: string;
+  description?: string;
+}
+
 const ContentPage: React.FC = () => {
   const { chapterId } = useParams<{ chapterId: string }>();
   const [contentType, setContentType] = useState<'video' | 'podcast'>('video');
   const [currentVideoId, setCurrentVideoId] = useState('1');
+  const [currentPodcastId, setCurrentPodcastId] = useState('1');
   const [showPodcastPlayer, setShowPodcastPlayer] = useState(false);
+  const [completedContent, setCompletedContent] = useState<{videos: string[], podcasts: string[]}>(() => {
+    // Load from localStorage
+    const saved = localStorage.getItem(`chapter_${chapterId}_progress`);
+    return saved ? JSON.parse(saved) : { videos: [], podcasts: [] };
+  });
 
   const videos: Video[] = [
     {
@@ -40,13 +55,59 @@ const ContentPage: React.FC = () => {
     }
   ];
 
+  const podcasts: Podcast[] = [
+    {
+      id: '1',
+      title: 'Reflexões Iniciais - A Jornada Interior',
+      thumbnail: '/images/podcast1-thumb.jpg',
+      duration: '25:30',
+      audioUrl: 'https://example.com/podcast1.mp3',
+      description: 'Uma meditação guiada sobre os conceitos apresentados no capítulo, explorando nossa conexão com o feminino selvagem.'
+    },
+    {
+      id: '2',
+      title: 'Conversas Profundas - Despertando a Loba',
+      thumbnail: '/images/podcast2-thumb.jpg',
+      duration: '32:15',
+      audioUrl: 'https://example.com/podcast2.mp3',
+      description: 'Diálogo íntimo sobre como reconhecer e honrar nossa natureza instintiva.'
+    },
+    {
+      id: '3',
+      title: 'Integrando os Aprendizados',
+      thumbnail: '/images/podcast3-thumb.jpg',
+      duration: '28:45',
+      audioUrl: 'https://example.com/podcast3.mp3',
+      description: 'Como aplicar os ensinamentos deste capítulo em nossa vida cotidiana.'
+    }
+  ];
+
   const currentVideo = videos.find(v => v.id === currentVideoId) || videos[0];
+  const currentPodcast = podcasts.find(p => p.id === currentPodcastId) || podcasts[0];
 
   const handleContentTypeChange = (type: 'video' | 'podcast') => {
     setContentType(type);
-    if (type === 'podcast') {
-      setShowPodcastPlayer(true);
+  };
+
+  const toggleContentCompletion = (contentId: string, type: 'video' | 'podcast') => {
+    const key = type === 'video' ? 'videos' : 'podcasts';
+    const updatedContent = { ...completedContent };
+    
+    if (updatedContent[key].includes(contentId)) {
+      // Remove from completed
+      updatedContent[key] = updatedContent[key].filter(id => id !== contentId);
+    } else {
+      // Add to completed
+      updatedContent[key] = [...updatedContent[key], contentId];
     }
+    
+    setCompletedContent(updatedContent);
+    localStorage.setItem(`chapter_${chapterId}_progress`, JSON.stringify(updatedContent));
+  };
+
+  const isContentCompleted = (contentId: string, type: 'video' | 'podcast') => {
+    const key = type === 'video' ? 'videos' : 'podcasts';
+    return completedContent[key].includes(contentId);
   };
 
   return (
@@ -54,7 +115,7 @@ const ContentPage: React.FC = () => {
       {/* Header with Toggle */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-4">
-          Vídeo Aula - Capítulo {chapterId}
+          {contentType === 'video' ? 'Vídeo Aula' : 'Podcast'} - Capítulo {chapterId}
         </h1>
         
         {/* Content Type Toggle */}
@@ -84,81 +145,214 @@ const ContentPage: React.FC = () => {
 
       {/* Main Content Area */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Video Player */}
+        {/* Media Player */}
         <div className="lg:col-span-2">
-          <div className="bg-black rounded-xl overflow-hidden aspect-video">
-            <video
-              controls
-              className="w-full h-full"
-              poster={currentVideo.thumbnail}
-              src={currentVideo.url}
-            >
-              Seu navegador não suporta a reprodução de vídeo.
-            </video>
-          </div>
-          
-          {/* Video Info */}
-          <div className="mt-4 bg-white rounded-xl p-6 shadow-sm">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              {currentVideo.title}
-            </h2>
-            <p className="text-gray-600">
-              Uma análise profunda sobre os conceitos apresentados neste capítulo, 
-              explorando os arquétipos femininos e sua relação com nossa jornada de autodescoberta.
-            </p>
-          </div>
+          {contentType === 'video' ? (
+            <>
+              <div className="bg-black rounded-xl overflow-hidden aspect-video">
+                <video
+                  controls
+                  className="w-full h-full"
+                  poster={currentVideo.thumbnail}
+                  src={currentVideo.url}
+                >
+                  Seu navegador não suporta a reprodução de vídeo.
+                </video>
+              </div>
+              
+              {/* Video Info */}
+              <div className="mt-4 bg-white rounded-xl p-6 shadow-sm">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                      {currentVideo.title}
+                    </h2>
+                    <p className="text-gray-600">
+                      Uma análise profunda sobre os conceitos apresentados neste capítulo, 
+                      explorando os arquétipos femininos e sua relação com nossa jornada de autodescoberta.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => toggleContentCompletion(currentVideo.id, 'video')}
+                    className={`ml-4 px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 ${
+                      isContentCompleted(currentVideo.id, 'video')
+                        ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {isContentCompleted(currentVideo.id, 'video') ? (
+                      <>
+                        <span>✓</span>
+                        <span>Concluída</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>○</span>
+                        <span>Marcar como concluída</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Podcast Player */}
+              <div className="bg-gradient-to-br from-terracota to-marrom-escuro rounded-xl overflow-hidden aspect-video relative">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-48 h-48 bg-white/20 rounded-full flex items-center justify-center mb-4 mx-auto">
+                      <span className="text-8xl">🎧</span>
+                    </div>
+                    <h3 className="text-white text-2xl font-bold mb-2">{currentPodcast.title}</h3>
+                    <p className="text-white/80">{currentPodcast.duration}</p>
+                    <button
+                      onClick={() => setShowPodcastPlayer(true)}
+                      className="mt-4 px-8 py-3 bg-white text-terracota rounded-full font-semibold hover:bg-gray-100 transition-colors"
+                    >
+                      ▶️ Reproduzir
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Podcast Info */}
+              <div className="mt-4 bg-white rounded-xl p-6 shadow-sm">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                      {currentPodcast.title}
+                    </h2>
+                    <p className="text-gray-600">
+                      {currentPodcast.description || 'Uma jornada sonora pelos caminhos do feminino selvagem.'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => toggleContentCompletion(currentPodcast.id, 'podcast')}
+                    className={`ml-4 px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 ${
+                      isContentCompleted(currentPodcast.id, 'podcast')
+                        ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {isContentCompleted(currentPodcast.id, 'podcast') ? (
+                      <>
+                        <span>✓</span>
+                        <span>Concluída</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>○</span>
+                        <span>Marcar como concluída</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
-        {/* Video List */}
+        {/* Media List */}
         <div className="bg-white rounded-xl p-6 shadow-sm">
           <h3 className="font-semibold text-gray-900 mb-4">
-            Vídeos de Análise do Capítulo
+            {contentType === 'video' ? 'Vídeos de Análise' : 'Episódios de Podcast'}
           </h3>
           
           <div className="space-y-3">
-            {videos.map((video) => {
-              const isActive = video.id === currentVideoId;
-              
-              return (
-                <button
-                  key={video.id}
-                  onClick={() => setCurrentVideoId(video.id)}
-                  className={`w-full flex items-start gap-3 p-3 rounded-lg transition-all ${
-                    isActive
-                      ? 'bg-terracota/10 border border-terracota'
-                      : 'hover:bg-gray-50'
-                  }`}
-                >
-                  {/* Thumbnail */}
-                  <div className="flex-shrink-0 w-24 h-16 bg-gray-200 rounded-md overflow-hidden relative">
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                      {isActive ? (
-                        <span className="text-white text-2xl">▶️</span>
-                      ) : (
-                        <span className="text-white/70 text-xl">○</span>
+            {contentType === 'video' ? (
+              videos.map((video) => {
+                const isActive = video.id === currentVideoId;
+                
+                return (
+                  <button
+                    key={video.id}
+                    onClick={() => setCurrentVideoId(video.id)}
+                    className={`w-full flex items-start gap-3 p-3 rounded-lg transition-all ${
+                      isActive
+                        ? 'bg-terracota/10 border border-terracota'
+                        : 'hover:bg-gray-50'
+                    }`}
+                  >
+                    {/* Thumbnail */}
+                    <div className="flex-shrink-0 w-24 h-16 bg-gray-200 rounded-md overflow-hidden relative">
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                        {isActive ? (
+                          <span className="text-white text-2xl">▶️</span>
+                        ) : (
+                          <span className="text-white/70 text-xl">○</span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Video Info */}
+                    <div className="flex-1 text-left">
+                      <div className="flex items-center gap-2">
+                        <h4 className={`font-medium ${
+                          isActive ? 'text-terracota' : 'text-gray-900'
+                        }`}>
+                          {video.title}
+                        </h4>
+                        {isContentCompleted(video.id, 'video') && (
+                          <span className="text-green-600 text-sm">✓</span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-500 mt-1">
+                        {video.duration}
+                      </p>
+                      {isActive && (
+                        <p className="text-xs text-terracota mt-1">
+                          Assistindo agora
+                        </p>
                       )}
                     </div>
-                  </div>
-                  
-                  {/* Video Info */}
-                  <div className="flex-1 text-left">
-                    <h4 className={`font-medium ${
-                      isActive ? 'text-terracota' : 'text-gray-900'
-                    }`}>
-                      {video.title}
-                    </h4>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {video.duration}
-                    </p>
-                    {isActive && (
-                      <p className="text-xs text-terracota mt-1">
-                        Assistindo agora
+                  </button>
+                );
+              })
+            ) : (
+              podcasts.map((podcast) => {
+                const isActive = podcast.id === currentPodcastId;
+                
+                return (
+                  <button
+                    key={podcast.id}
+                    onClick={() => setCurrentPodcastId(podcast.id)}
+                    className={`w-full flex items-start gap-3 p-3 rounded-lg transition-all ${
+                      isActive
+                        ? 'bg-terracota/10 border border-terracota'
+                        : 'hover:bg-gray-50'
+                    }`}
+                  >
+                    {/* Thumbnail */}
+                    <div className="flex-shrink-0 w-24 h-16 bg-gradient-to-br from-terracota to-marrom-escuro rounded-md overflow-hidden relative flex items-center justify-center">
+                      <span className="text-white text-2xl">🎧</span>
+                    </div>
+                    
+                    {/* Podcast Info */}
+                    <div className="flex-1 text-left">
+                      <div className="flex items-center gap-2">
+                        <h4 className={`font-medium ${
+                          isActive ? 'text-terracota' : 'text-gray-900'
+                        }`}>
+                          {podcast.title}
+                        </h4>
+                        {isContentCompleted(podcast.id, 'podcast') && (
+                          <span className="text-green-600 text-sm">✓</span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-500 mt-1">
+                        {podcast.duration}
                       </p>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
+                      {isActive && (
+                        <p className="text-xs text-terracota mt-1">
+                          Ouvindo agora
+                        </p>
+                      )}
+                    </div>
+                  </button>
+                );
+              })
+            )}
           </div>
         </div>
       </div>
@@ -169,10 +363,11 @@ const ContentPage: React.FC = () => {
           isOpen={showPodcastPlayer}
           onClose={() => setShowPodcastPlayer(false)}
           episode={{
-            title: currentVideo.title,
-            coverImage: '/images/podcast-cover.jpg',
-            audioUrl: 'https://example.com/audio.mp3',
-            duration: currentVideo.duration
+            title: currentPodcast.title,
+            coverImage: currentPodcast.thumbnail,
+            audioUrl: currentPodcast.audioUrl,
+            duration: currentPodcast.duration,
+            thumbnail: currentPodcast.thumbnail
           }}
         />
       )}

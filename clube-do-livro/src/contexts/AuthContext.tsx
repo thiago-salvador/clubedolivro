@@ -1,7 +1,20 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User } from '../types';
+import { User, UserRole } from '../types';
 import { authService } from '../services/auth.service';
 import { storageService } from '../services/storage.service';
+
+// Helper para converter string para UserRole
+const stringToUserRole = (role: string): UserRole => {
+  switch (role) {
+    case 'super_admin':
+      return UserRole.SUPER_ADMIN;
+    case 'admin':
+      return UserRole.ADMIN;
+    case 'aluna':
+    default:
+      return UserRole.ALUNA;
+  }
+};
 
 interface AuthContextType {
   user: User | null;
@@ -12,6 +25,7 @@ interface AuthContextType {
   isLoading: boolean;
   requestPasswordReset: (email: string) => Promise<{ success: boolean; message: string }>;
   resetPassword: (token: string, password: string) => Promise<void>;
+  updateAvatar: (avatar: string | null) => void;
 }
 
 interface RegisterData {
@@ -58,6 +72,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           // Adicionar badges e outras informações do usuário
           const fullUser: User = {
             ...result.user,
+            role: stringToUserRole(result.user.role || 'aluna'),
             badges: [
               {
                 id: '1',
@@ -88,6 +103,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               if (retryResult.valid && retryResult.user) {
                 const fullUser: User = {
                   ...retryResult.user,
+                  role: stringToUserRole(retryResult.user.role || 'aluna'),
                   badges: [],
                   joinedDate: new Date(),
                   previousParticipations: []
@@ -125,6 +141,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Criar usuário completo
       const fullUser: User = {
         ...response.user,
+        role: stringToUserRole(response.user.role || 'aluna'),
         badges: [
           {
             id: '1',
@@ -155,6 +172,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Criar usuário completo
       const fullUser: User = {
         ...response.user,
+        role: stringToUserRole(response.user.role || 'aluna'),
         badges: [
           {
             id: '1',
@@ -200,6 +218,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     await authService.resetPassword({ token, password });
   };
 
+  const updateAvatar = (avatar: string | null) => {
+    if (user) {
+      const updatedUser = { ...user, avatar: avatar || undefined };
+      setUser(updatedUser);
+      storageService.setUserData(updatedUser);
+    }
+  };
+
   const isAuthenticated = !!user;
 
   const value = {
@@ -210,7 +236,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isAuthenticated,
     isLoading,
     requestPasswordReset,
-    resetPassword
+    resetPassword,
+    updateAvatar
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

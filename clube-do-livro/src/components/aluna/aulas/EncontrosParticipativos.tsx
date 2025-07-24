@@ -37,12 +37,23 @@ interface Comment {
   likes: number;
 }
 
+interface Question {
+  id: string;
+  meetingId: string;
+  author: string;
+  question: string;
+  createdAt: Date;
+  answered: boolean;
+}
+
 const EncontrosParticipativos: React.FC = () => {
   const { chapterId } = useParams<{ chapterId: string }>();
   const [isEnrolled, setIsEnrolled] = useState<Record<string, boolean>>({});
   const [activeTab, setActiveTab] = useState<'upcoming' | 'recordings'>('upcoming');
   const [selectedMeeting, setSelectedMeeting] = useState<string | null>(null);
   const [newComment, setNewComment] = useState('');
+  const [showQuestions, setShowQuestions] = useState<string | null>(null);
+  const [newQuestion, setNewQuestion] = useState('');
 
   // Dados simulados dos encontros
   const meetings: Meeting[] = [
@@ -131,6 +142,25 @@ const EncontrosParticipativos: React.FC = () => {
     }
   ];
 
+  const questions: Question[] = [
+    {
+      id: 'q1',
+      meetingId: '1',
+      author: 'Maria Santos',
+      question: 'Como podemos identificar quando estamos reprimindo nossa natureza selvagem no dia a dia?',
+      createdAt: new Date('2024-03-20T10:30:00'),
+      answered: false
+    },
+    {
+      id: 'q2',
+      meetingId: '1',
+      author: 'Julia Oliveira',
+      question: 'Existe alguma diferença entre intuição feminina e masculina segundo o livro?',
+      createdAt: new Date('2024-03-21T14:20:00'),
+      answered: false
+    }
+  ];
+
   // Filtrar encontros e gravações do capítulo atual
   const chapterMeetings = meetings.filter(m => m.chapterId === chapterId);
   const upcomingMeetings = chapterMeetings.filter(m => m.status === 'upcoming' || m.status === 'live');
@@ -154,6 +184,14 @@ const EncontrosParticipativos: React.FC = () => {
     if (newComment.trim()) {
       console.log('Novo comentário:', { meetingId, content: newComment });
       setNewComment('');
+    }
+  };
+
+  const handleAddQuestion = (meetingId: string) => {
+    if (newQuestion.trim()) {
+      console.log('Nova pergunta:', { meetingId, question: newQuestion });
+      setNewQuestion('');
+      setShowQuestions(null);
     }
   };
 
@@ -325,6 +363,16 @@ const EncontrosParticipativos: React.FC = () => {
                               📋
                             </button>
                           )}
+                          
+                          {enrolled && !isLive && (
+                            <button
+                              onClick={() => setShowQuestions(meeting.id)}
+                              className="px-4 py-3 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
+                              title="Enviar pergunta para o encontro"
+                            >
+                              ❓
+                            </button>
+                          )}
                         </div>
                       </div>
 
@@ -458,6 +506,81 @@ const EncontrosParticipativos: React.FC = () => {
         </div>
       )}
 
+      {/* Pre-meeting Questions Section */}
+      {showQuestions && (
+        <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-gray-900">
+              ❓ Perguntas para o Encontro
+            </h3>
+            <button
+              onClick={() => setShowQuestions(null)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="mb-6">
+            <p className="text-gray-600 mb-4">
+              Envie suas perguntas antecipadamente para que possamos abordar durante o encontro.
+            </p>
+            
+            {/* Question Form */}
+            <textarea
+              value={newQuestion}
+              onChange={(e) => setNewQuestion(e.target.value)}
+              placeholder="Qual sua pergunta sobre o capítulo ou tema do encontro?"
+              rows={3}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+            />
+            <button
+              onClick={() => handleAddQuestion(showQuestions)}
+              disabled={!newQuestion.trim()}
+              className="mt-3 bg-purple-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Enviar Pergunta
+            </button>
+          </div>
+
+          {/* Questions List */}
+          <div className="space-y-4">
+            <h4 className="font-medium text-gray-900 flex items-center gap-2">
+              <span>📝</span>
+              Perguntas já enviadas:
+            </h4>
+            {questions
+              .filter(q => q.meetingId === showQuestions)
+              .map((question) => (
+                <div key={question.id} className="bg-purple-50 rounded-lg p-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <span className="font-medium text-gray-900">{question.author}</span>
+                      <span className="text-sm text-gray-500 ml-2">
+                        {question.createdAt.toLocaleDateString('pt-BR')}
+                      </span>
+                    </div>
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      question.answered 
+                        ? 'bg-green-100 text-green-700' 
+                        : 'bg-yellow-100 text-yellow-700'
+                    }`}>
+                      {question.answered ? '✅ Respondida' : '⏳ Pendente'}
+                    </span>
+                  </div>
+                  <p className="text-gray-700">{question.question}</p>
+                </div>
+              ))}
+            
+            {questions.filter(q => q.meetingId === showQuestions).length === 0 && (
+              <p className="text-gray-500 text-center py-4">
+                Nenhuma pergunta enviada ainda. Seja a primeira!
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Tips */}
       <div className="mt-6 bg-yellow-50 rounded-xl p-6">
         <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
@@ -480,6 +603,10 @@ const EncontrosParticipativos: React.FC = () => {
           <li className="flex items-start gap-2">
             <span>•</span>
             <span>Respeite as experiências e o tempo de fala das outras participantes</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span>•</span>
+            <span>Use o botão ❓ para enviar perguntas antecipadamente</span>
           </li>
         </ul>
       </div>

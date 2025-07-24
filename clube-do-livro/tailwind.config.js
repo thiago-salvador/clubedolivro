@@ -3,16 +3,40 @@ module.exports = {
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        'terracota': '#B8654B',
-        'terracota-dark': '#96533C',
+        // Cores principais com contraste melhorado
+        'terracota': {
+          DEFAULT: '#B8654B',
+          light: '#C87A60',
+          dark: '#96533C',
+          darker: '#7A4330', // Novo: melhor contraste em fundos claros
+        },
+        'terracota-dark': '#96533C', // Mantido para compatibilidade
         'bege-claro': '#F5E6D3',
-        'verde-oliva': '#6B6B47',
-        'verde-floresta': '#476B47',
-        'dourado': '#D4A574',
+        'verde-oliva': {
+          DEFAULT: '#6B6B47',
+          dark: '#555538', // Novo: melhor contraste
+        },
+        'verde-floresta': {
+          DEFAULT: '#476B47',
+          dark: '#365436', // Novo: melhor contraste
+        },
+        'dourado': {
+          DEFAULT: '#D4A574',
+          dark: '#B8864A', // Novo: melhor contraste em fundos claros
+        },
         'marrom-escuro': '#4D381B',
+        
+        // Cores de texto acessíveis
+        'text': {
+          'primary': '#1f2937', // gray-800
+          'secondary': '#4b5563', // gray-600
+          'muted': '#6b7280', // gray-500
+          'on-dark': '#f9fafb', // gray-50
+        },
       },
       fontFamily: {
         'serif': ['Cormorant Garamond', 'Playfair Display', 'Georgia', 'serif'],

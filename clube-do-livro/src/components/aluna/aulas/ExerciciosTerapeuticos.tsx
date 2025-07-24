@@ -8,6 +8,7 @@ interface Exercise {
   placeholder?: string;
   options?: string[];
   hint?: string;
+  duration?: number; // duração sugerida em minutos
 }
 
 interface UserResponse {
@@ -29,6 +30,9 @@ const ExerciciosTerapeuticos: React.FC = () => {
   const [savedResponses, setSavedResponses] = useState<UserResponse[]>([]);
   const [showSaveMessage, setShowSaveMessage] = useState(false);
   const [expandedExercises, setExpandedExercises] = useState<string[]>([]);
+  const [favoriteExercises, setFavoriteExercises] = useState<string[]>([]);
+  const [timers, setTimers] = useState<Record<string, number>>({});
+  const [activeTimers, setActiveTimers] = useState<Record<string, NodeJS.Timeout>>({});
 
   // Dados dos exercícios por capítulo
   const chaptersData: Record<string, ChapterExercises> = {
@@ -42,7 +46,8 @@ const ExerciciosTerapeuticos: React.FC = () => {
           question: 'Quando foi a última vez que você sentiu sua intuição falar mais alto que sua razão? Descreva essa experiência e como você se sentiu.',
           type: 'text',
           placeholder: 'Compartilhe sua experiência com detalhes...',
-          hint: 'Pense em momentos onde você "simplesmente sabia" algo, sem explicação lógica.'
+          hint: 'Pense em momentos onde você "simplesmente sabia" algo, sem explicação lógica.',
+          duration: 10
         },
         {
           id: '1-2',
@@ -62,13 +67,15 @@ const ExerciciosTerapeuticos: React.FC = () => {
           question: 'Escreva uma carta para sua mulher selvagem interior. O que você gostaria de dizer a ela?',
           type: 'creative',
           placeholder: 'Querida mulher selvagem...',
-          hint: 'Seja honesta e vulnerável. Esta carta é só para você.'
+          hint: 'Seja honesta e vulnerável. Esta carta é só para você.',
+          duration: 15
         },
         {
           id: '1-4',
           question: 'Identifique três situações em sua vida atual onde você sente que está "domesticada demais". Como poderia trazer mais selvageria saudável para essas áreas?',
           type: 'reflection',
-          placeholder: 'Reflita sobre as áreas onde você se sente limitada...'
+          placeholder: 'Reflita sobre as áreas onde você se sente limitada...',
+          duration: 12
         }
       ]
     },
@@ -235,7 +242,23 @@ const ExerciciosTerapeuticos: React.FC = () => {
         console.error('Erro ao carregar respostas:', error);
       }
     }
+
+    // Carregar favoritos
+    const favoritesKey = `favorites_chapter_${chapterId}`;
+    const savedFavorites = localStorage.getItem(favoritesKey);
+    if (savedFavorites) {
+      setFavoriteExercises(JSON.parse(savedFavorites));
+    }
   }, [chapterId]);
+
+  // Cleanup timers
+  useEffect(() => {
+    return () => {
+      Object.values(activeTimers).forEach(timer => {
+        if (timer) clearInterval(timer);
+      });
+    };
+  }, [activeTimers]);
 
   const handleResponseChange = (exerciseId: string, value: string | string[]) => {
     setResponses(prev => ({
@@ -281,6 +304,67 @@ const ExerciciosTerapeuticos: React.FC = () => {
       key => responses[key] && (Array.isArray(responses[key]) ? responses[key].length > 0 : responses[key])
     ).length;
     return Math.round((completedExercises / totalExercises) * 100);
+  };
+
+  const toggleFavorite = (exerciseId: string) => {
+    const newFavorites = favoriteExercises.includes(exerciseId)
+      ? favoriteExercises.filter(id => id !== exerciseId)
+      : [...favoriteExercises, exerciseId];
+    
+    setFavoriteExercises(newFavorites);
+    localStorage.setItem(`favorites_chapter_${chapterId}`, JSON.stringify(newFavorites));
+  };
+
+  const startTimer = (exerciseId: string, duration: number) => {
+    // Clear existing timer if any
+    if (activeTimers[exerciseId]) {
+      clearInterval(activeTimers[exerciseId]);
+    }
+
+    const durationInSeconds = duration * 60;
+    setTimers(prev => ({ ...prev, [exerciseId]: durationInSeconds }));
+
+    const timer = setInterval(() => {
+      setTimers(prev => {
+        const newTime = prev[exerciseId] - 1;
+        if (newTime <= 0) {
+          clearInterval(timer);
+          setActiveTimers(prev => {
+            const newTimers = { ...prev };
+            delete newTimers[exerciseId];
+            return newTimers;
+          });
+          // Alert when time is up
+          alert('⏰ Tempo do exercício finalizado!');
+          return { ...prev, [exerciseId]: 0 };
+        }
+        return { ...prev, [exerciseId]: newTime };
+      });
+    }, 1000);
+
+    setActiveTimers(prev => ({ ...prev, [exerciseId]: timer }));
+  };
+
+  const stopTimer = (exerciseId: string) => {
+    if (activeTimers[exerciseId]) {
+      clearInterval(activeTimers[exerciseId]);
+      setActiveTimers(prev => {
+        const newTimers = { ...prev };
+        delete newTimers[exerciseId];
+        return newTimers;
+      });
+    }
+    setTimers(prev => {
+      const newTimers = { ...prev };
+      delete newTimers[exerciseId];
+      return newTimers;
+    });
+  };
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
   const downloadPDF = () => {
@@ -348,11 +432,8 @@ Data: ${new Date().toLocaleDateString('pt-BR')}
 
           return (
             <div key={exercise.id} className="bg-white rounded-xl shadow-sm overflow-hidden">
-              <button
-                onClick={() => toggleExercise(exercise.id)}
-                className="w-full p-6 text-left hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex items-start justify-between">
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <span className="flex-shrink-0 w-8 h-8 bg-terracota/20 rounded-full flex items-center justify-center text-sm font-semibold text-terracota">
@@ -361,16 +442,79 @@ Data: ${new Date().toLocaleDateString('pt-BR')}
                       <h3 className="font-medium text-gray-900 flex-1">
                         {exercise.question}
                       </h3>
+                      <div className="flex items-center gap-2">
+                        {favoriteExercises.includes(exercise.id) && (
+                          <span className="text-yellow-500 text-sm">⭐</span>
+                        )}
+                        {exercise.duration && (
+                          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                            {exercise.duration} min
+                          </span>
+                        )}
+                      </div>
                     </div>
                     {hasResponse && !isExpanded && (
                       <p className="text-sm text-green-600 ml-11">✓ Respondido</p>
                     )}
+                    
+                    {/* Exercise Controls */}
+                    <div className="flex items-center gap-2 ml-11 mt-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleFavorite(exercise.id);
+                        }}
+                        className={`px-3 py-1 text-xs rounded-full transition-colors ${
+                          favoriteExercises.includes(exercise.id)
+                            ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                      >
+                        {favoriteExercises.includes(exercise.id) ? '⭐ Favorito' : '☆ Favoritar'}
+                      </button>
+                      
+                      {exercise.duration && (
+                        <>
+                          {!activeTimers[exercise.id] ? (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                startTimer(exercise.id, exercise.duration!);
+                              }}
+                              className="px-3 py-1 text-xs bg-green-100 text-green-700 rounded-full hover:bg-green-200 transition-colors"
+                            >
+                              ⏱️ Iniciar Timer
+                            </button>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-mono bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                                ⏱️ {formatTime(timers[exercise.id] || 0)}
+                              </span>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  stopTimer(exercise.id);
+                                }}
+                                className="px-2 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
+                              >
+                                ⏹️
+                              </button>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <span className={`ml-4 transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
-                    ▼
-                  </span>
+                  <button
+                    onClick={() => toggleExercise(exercise.id)}
+                    className={`ml-4 p-2 rounded-full hover:bg-gray-100 transition-colors`}
+                  >
+                    <span className={`transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                      ▼
+                    </span>
+                  </button>
                 </div>
-              </button>
+              </div>
 
               {isExpanded && (
                 <div className="px-6 pb-6 border-t border-gray-100">

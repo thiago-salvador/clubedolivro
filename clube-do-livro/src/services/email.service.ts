@@ -326,6 +326,127 @@ IMPORTANTE:
 
 Clube do Livro
     `
+  },
+
+  hotmart_welcome: {
+    subject: '🎉 Bem-vinda ao Clube do Livro - {{productName}}',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h1 style="color: #E07A5F; margin-bottom: 10px;">🎉 Bem-vinda!</h1>
+          <h2 style="color: #F4A261; margin-top: 0;">{{productName}}</h2>
+        </div>
+        
+        <div style="background: #FFF5F5; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+          <h3 style="color: #E07A5F;">Olá, {{userName}}! 🌟</h3>
+          {{#isNewUser}}
+          <p><strong>{{welcomeMessage}}</strong></p>
+          <p>Sua conta foi criada automaticamente após a confirmação de pagamento no Hotmart.</p>
+          {{/isNewUser}}
+          {{^isNewUser}}
+          <p><strong>{{welcomeMessage}}</strong></p>
+          <p>Seu acesso foi atualizado com o novo produto adquirido.</p>
+          {{/isNewUser}}
+        </div>
+
+        <div style="background: #E8F5E8; padding: 20px; border-radius: 10px; margin-bottom: 25px;">
+          <h4 style="color: #2D5A2D; margin-top: 0;">✅ Pagamento Confirmado</h4>
+          <p style="margin: 0;"><strong>Produto:</strong> {{productName}}</p>
+          <p style="margin: 5px 0 0 0;"><strong>Email:</strong> {{userEmail}}</p>
+        </div>
+
+        <div style="margin-bottom: 25px;">
+          <h4 style="color: #E07A5F;">📚 Seus próximos passos:</h4>
+          <ol style="line-height: 1.8;">
+            {{#isNewUser}}
+            <li><strong>Acesse sua área da aluna:</strong> <a href="{{loginUrl}}" style="color: #E07A5F;">Fazer login</a> com seu email</li>
+            <li><strong>Defina sua senha:</strong> Use a opção "Esqueci minha senha" no primeiro acesso</li>
+            {{/isNewUser}}
+            {{^isNewUser}}
+            <li><strong>Acesse sua área da aluna:</strong> <a href="{{loginUrl}}" style="color: #E07A5F;">Entrar agora</a></li>
+            {{/isNewUser}}
+            <li><strong>Explore o conteúdo:</strong> Vídeos, áudios e materiais já estão disponíveis</li>
+            <li><strong>Participe da comunidade:</strong> Conecte-se com outras mulheres da jornada</li>
+            <li><strong>Entre no WhatsApp:</strong> Receba avisos importantes e tire dúvidas</li>
+          </ol>
+        </div>
+
+        <div style="background: #F7F3F0; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+          <h4 style="color: #E07A5F; margin-top: 0;">💡 Importante:</h4>
+          <p style="margin-bottom: 0;">
+            {{#isNewUser}}
+            Como sua conta foi criada automaticamente, você precisará definir uma senha no primeiro acesso. 
+            Use a opção "Esqueci minha senha" na tela de login.
+            {{/isNewUser}}
+            {{^isNewUser}}
+            Você já pode acessar todos os novos conteúdos com seu login atual.
+            {{/isNewUser}}
+          </p>
+        </div>
+
+        <div style="text-align: center; margin: 25px 0;">
+          <a href="{{loginUrl}}" style="background: #E07A5F; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
+            ACESSAR MINHA ÁREA
+          </a>
+        </div>
+
+        <div style="background: #F0F9FF; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+          <h5 style="color: #1E40AF; margin-top: 0;">📞 Precisa de ajuda?</h5>
+          <p style="margin: 0;">Entre em contato conosco: <a href="mailto:{{supportEmail}}" style="color: #1E40AF;">{{supportEmail}}</a></p>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+          <p style="color: #666;">Com carinho,<br><strong>Equipe Clube do Livro no Divã</strong></p>
+        </div>
+        
+        <div style="text-align: center; font-size: 12px; color: #999; margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+          <p>Clube do Livro no Divã - {{productName}}</p>
+          <p>Este email foi enviado para {{userEmail}}</p>
+          <p>Compra processada automaticamente via Hotmart</p>
+        </div>
+      </div>
+    `,
+    text: `
+BEM-VINDA AO CLUBE DO LIVRO! 🎉
+{{productName}}
+
+Olá, {{userName}}!
+
+{{welcomeMessage}}
+
+✅ PAGAMENTO CONFIRMADO
+Produto: {{productName}}
+Email: {{userEmail}}
+
+📚 SEUS PRÓXIMOS PASSOS:
+{{#isNewUser}}
+1. Acesse sua área da aluna: {{loginUrl}}
+2. Defina sua senha usando "Esqueci minha senha"
+{{/isNewUser}}
+{{^isNewUser}}
+1. Acesse sua área da aluna: {{loginUrl}}
+{{/isNewUser}}
+2. Explore o conteúdo disponível
+3. Participe da comunidade
+4. Entre no grupo do WhatsApp
+
+💡 IMPORTANTE:
+{{#isNewUser}}
+Sua conta foi criada automaticamente. Use "Esqueci minha senha" no primeiro acesso.
+{{/isNewUser}}
+{{^isNewUser}}
+Você já pode acessar todos os novos conteúdos com seu login atual.
+{{/isNewUser}}
+
+📞 PRECISA DE AJUDA?
+Email: {{supportEmail}}
+
+Com carinho,
+Equipe Clube do Livro no Divã
+
+Este email foi enviado para {{userEmail}}
+Compra processada automaticamente via Hotmart
+    `
   }
 };
 
