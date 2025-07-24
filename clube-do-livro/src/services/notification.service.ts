@@ -418,6 +418,29 @@ Não perca o ritmo da sua jornada de autoconhecimento!
     return null;
   }
 
+  // Obter todos os templates
+  public getTemplates(): NotificationTemplate[] {
+    const templates = localStorage.getItem(this.templatesKey);
+    if (templates) {
+      return JSON.parse(templates);
+    }
+    return [];
+  }
+
+  // Criar novo template
+  public createTemplate(template: NotificationTemplate): NotificationTemplate {
+    const templates = this.getTemplates();
+    const newTemplate = {
+      ...template,
+      id: `template_${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    templates.push(newTemplate);
+    localStorage.setItem(this.templatesKey, JSON.stringify(templates));
+    return newTemplate;
+  }
+
   // Renderizar template com variáveis
   private renderTemplate(template: NotificationTemplate, data: any): { subject: string; body: string } {
     let subject = template.subject;
@@ -461,11 +484,18 @@ Não perca o ritmo da sua jornada de autoconhecimento!
   }
 
   // Cancelar notificação específica
-  public cancelNotification(notificationId: string): void {
+  public cancelNotification(notificationId: string): boolean {
     const queue = this.getQueue();
+    const initialLength = queue.length;
     const filteredQueue = queue.filter(n => n.id !== notificationId);
-    localStorage.setItem(this.storageKey, JSON.stringify(filteredQueue));
-    console.log(`❌ Notificação cancelada: ${notificationId}`);
+    
+    if (filteredQueue.length < initialLength) {
+      localStorage.setItem(this.storageKey, JSON.stringify(filteredQueue));
+      console.log(`❌ Notificação cancelada: ${notificationId}`);
+      return true;
+    }
+    
+    return false;
   }
 
   // Listar próximas notificações
