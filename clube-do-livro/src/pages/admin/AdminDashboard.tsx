@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, BookOpen, MessageSquare, TrendingUp, Mail, DollarSign, BarChart3, Clock, Award, Target, Download, FileSpreadsheet, Calendar, Filter } from 'lucide-react';
+import { Users, BookOpen, MessageSquare, TrendingUp, Mail, DollarSign, BarChart3, Clock, Award, Target, Download, FileSpreadsheet, Calendar, Filter, FileText } from 'lucide-react';
 import PeriodFilter from '../../components/admin/PeriodFilter';
 import * as XLSX from 'xlsx';
 import { formatDistanceToNow, format, subDays, startOfDay, subWeeks, subMonths, startOfWeek, startOfMonth, endOfWeek, endOfMonth, isWithinInterval } from 'date-fns';
@@ -1356,6 +1356,15 @@ const AdminDashboard: React.FC = () => {
             <TrendingUp className="w-6 h-6 text-terracota mb-2 group-hover:scale-110 transition-transform" />
             <h3 className="font-medium text-gray-900 dark:text-white">Hotmart Integration</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400">Monitorar vendas e integrações</p>
+          </Link>
+          
+          <Link
+            to="/admin/api-docs"
+            className="p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-terracota transition-colors text-left group"
+          >
+            <FileText className="w-6 h-6 text-terracota mb-2 group-hover:scale-110 transition-transform" />
+            <h3 className="font-medium text-gray-900 dark:text-white">Documentação da API</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Swagger e endpoints REST</p>
           </Link>
         </div>
       </div>

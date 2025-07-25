@@ -43,3 +43,4 @@ export const CourseList = lazy(() => import('../pages/admin/CourseList'));
 export const CourseEditor = lazy(() => import('../pages/admin/CourseEditor'));
 export const HotmartIntegration = lazy(() => import('../pages/admin/HotmartIntegration'));
 export const Notifications = lazy(() => import('../pages/admin/Notifications'));
+export const ApiDocs = lazy(() => import('../pages/admin/ApiDocs'));

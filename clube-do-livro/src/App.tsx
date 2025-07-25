@@ -58,7 +58,8 @@ import {
   CourseEditor,
   TagManager,
   HotmartIntegration,
-  Notifications
+  Notifications,
+  ApiDocs
 } from './utils/lazyImports';
 
 // Landing Page Component
@@ -241,6 +242,11 @@ function App() {
             <Route path="notifications" element={
               <Suspense fallback={<PageLoader />}>
                 <Notifications />
+              </Suspense>
+            } />
+            <Route path="api-docs" element={
+              <Suspense fallback={<PageLoader />}>
+                <ApiDocs />
               </Suspense>
             } />
             {/* Future admin routes will go here */}

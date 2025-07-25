@@ -3,9 +3,7 @@ import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Users, 
   BookOpen, 
-  Settings, 
-  BarChart3, 
-  MessageSquare, 
+  Settings,
   Tag,
   Mail,
   Home,
@@ -13,7 +11,8 @@ import {
   X,
   LogOut,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Zap
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAdminAuth } from '../../hooks/useAdminAuth';
@@ -27,9 +26,13 @@ interface MenuItem {
   children?: MenuItem[];
 }
 
-const AdminLayout: React.FC = () => {
+interface AdminLayoutProps {
+  children?: React.ReactNode;
+}
+
+const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [expandedItems, setExpandedItems] = useState<string[]>(['courses', 'students']);
+  const [expandedItems, setExpandedItems] = useState<string[]>(['courses', 'students', 'communication', 'integrations']);
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, user } = useAuth();
@@ -47,9 +50,7 @@ const AdminLayout: React.FC = () => {
       label: 'Cursos',
       icon: <BookOpen className="w-5 h-5" />,
       children: [
-        { id: 'courses-list', label: 'Todos os Cursos', icon: null, path: '/admin/courses' },
-        { id: 'courses-create', label: 'Criar Curso', icon: null, path: '/admin/courses/create' },
-        { id: 'courses-templates', label: 'Templates', icon: null, path: '/admin/courses/templates' }
+        { id: 'courses-list', label: 'Todos os Cursos', icon: null, path: '/admin/courses' }
       ]
     },
     {
@@ -57,16 +58,8 @@ const AdminLayout: React.FC = () => {
       label: 'Alunas',
       icon: <Users className="w-5 h-5" />,
       children: [
-        { id: 'students-list', label: 'Todas as Alunas', icon: null, path: '/admin/students' },
-        { id: 'students-add', label: 'Adicionar Aluna', icon: null, path: '/admin/students/add' },
-        { id: 'students-tags', label: 'Gerenciar Tags', icon: null, path: '/admin/tags' }
+        { id: 'students-list', label: 'Todas as Alunas', icon: null, path: '/admin/students' }
       ]
-    },
-    {
-      id: 'channels',
-      label: 'Canais de Debate',
-      icon: <MessageSquare className="w-5 h-5" />,
-      path: '/admin/channels'
     },
     {
       id: 'tags',
@@ -75,29 +68,32 @@ const AdminLayout: React.FC = () => {
       path: '/admin/tags'
     },
     {
-      id: 'notifications',
-      label: 'Notificações',
+      id: 'communication',
+      label: 'Comunicação',
       icon: <Mail className="w-5 h-5" />,
-      path: '/admin/notifications'
+      children: [
+        { id: 'notifications', label: 'Notificações', icon: null, path: '/admin/notifications' }
+      ]
     },
     {
-      id: 'analytics',
-      label: 'Métricas',
-      icon: <BarChart3 className="w-5 h-5" />,
-      path: '/admin/analytics'
+      id: 'integrations',
+      label: 'Integrações',
+      icon: <Zap className="w-5 h-5" />,
+      children: [
+        { id: 'hotmart', label: 'Hotmart', icon: null, path: '/admin/hotmart' },
+        { id: 'api-docs', label: 'Documentação da API', icon: null, path: '/admin/api-docs' }
+      ]
     }
   ];
 
-  // Adicionar item de configurações apenas para super admin
+  // Adicionar configurações apenas para super admin
   if (isSuperAdmin) {
     menuItems.push({
       id: 'settings',
       label: 'Configurações',
       icon: <Settings className="w-5 h-5" />,
       children: [
-        { id: 'settings-hotmart', label: 'Integração Hotmart', icon: null, path: '/admin/hotmart' },
-        { id: 'settings-admins', label: 'Administradores', icon: null, path: '/admin/settings/admins' },
-        { id: 'settings-notifications', label: 'Notificações', icon: null, path: '/admin/settings/notifications' }
+        { id: 'system-settings', label: 'Sistema', icon: null, path: '/admin/settings' }
       ]
     });
   }
@@ -275,7 +271,7 @@ const AdminLayout: React.FC = () => {
         {/* Page Content */}
         <main className="flex-1 overflow-auto p-6">
           <Breadcrumbs />
-          <Outlet />
+          {children || <Outlet />}
         </main>
       </div>
     </div>
