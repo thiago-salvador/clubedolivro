@@ -112,7 +112,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 setUser(fullUser);
                 storageService.setUserData(fullUser);
               }
-            } catch (error) {
+            } catch (error: any) {
+              // Log error without sensitive data
+              console.error('Token refresh failed:', {
+                error: error.message || 'Unknown error',
+                timestamp: new Date().toISOString()
+              });
               // Falha ao renovar, limpar tudo
               storageService.clearAll();
             }
@@ -120,8 +125,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             storageService.clearAll();
           }
         }
-      } catch (error) {
-        console.error('Erro ao verificar autenticação:', error);
+      } catch (error: any) {
+        // Sanitize error logging
+        console.error('Authentication check failed:', {
+          error: error.message || 'Unknown error',
+          timestamp: new Date().toISOString(),
+          // Don't log sensitive data like tokens
+        });
         storageService.clearAll();
       } finally {
         setIsLoading(false);
@@ -158,7 +168,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(fullUser);
       storageService.setUserData(fullUser);
     } catch (error: any) {
-      throw new Error(error.message || 'Erro ao fazer login');
+      // Sanitize error message
+      const sanitizedMessage = (error.message || 'Erro ao fazer login')
+        .replace(/[\n\r]/g, '')
+        .substring(0, 100);
+      
+      // Log error securely
+      console.error('Login failed:', {
+        timestamp: new Date().toISOString(),
+        // Don't log email or password
+      });
+      
+      throw new Error(sanitizedMessage);
     }
   };
 

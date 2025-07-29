@@ -1,49 +1,47 @@
-// Serviço de armazenamento seguro para tokens
-// Em produção, considere usar cookies httpOnly para maior segurança
+// Legacy storage service - redirects to secure storage
+// Maintained for backward compatibility
+import { secureStorageService, migrateFromOldStorage } from './secure-storage.service';
 
-const STORAGE_KEYS = {
-  ACCESS_TOKEN: 'clube_livro_access_token',
-  REFRESH_TOKEN: 'clube_livro_refresh_token',
-  USER_DATA: 'clube_livro_user_data'
-};
+// Migrate old data on load
+if (typeof window !== 'undefined') {
+  migrateFromOldStorage();
+}
 
+// Export the secure storage service with the old interface
 export const storageService = {
   // Tokens
   setTokens(accessToken: string, refreshToken: string): void {
-    localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
-    localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+    console.warn('storageService is deprecated. Use secureStorageService instead.');
+    secureStorageService.setTokens(accessToken, refreshToken);
   },
 
   getAccessToken(): string | null {
-    return localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+    return secureStorageService.getAccessToken();
   },
 
   getRefreshToken(): string | null {
-    return localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+    return secureStorageService.getRefreshToken();
   },
 
   clearTokens(): void {
-    localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+    secureStorageService.clearTokens();
   },
 
   // User data
   setUserData(user: any): void {
-    localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user));
+    secureStorageService.setUserData(user);
   },
 
   getUserData(): any | null {
-    const data = localStorage.getItem(STORAGE_KEYS.USER_DATA);
-    return data ? JSON.parse(data) : null;
+    return secureStorageService.getUserData();
   },
 
   clearUserData(): void {
-    localStorage.removeItem(STORAGE_KEYS.USER_DATA);
+    secureStorageService.clearUserData();
   },
 
   // Clear all
   clearAll(): void {
-    this.clearTokens();
-    this.clearUserData();
+    secureStorageService.clearAll();
   }
 };

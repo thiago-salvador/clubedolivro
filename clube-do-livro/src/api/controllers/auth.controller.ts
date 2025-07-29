@@ -65,8 +65,31 @@ export const authController = {
         return createApiError('VALIDATION_ERROR', 'Nome, email e senha são obrigatórios', 400);
       }
       
-      if (password.length < 6) {
-        return createApiError('VALIDATION_ERROR', 'Senha deve ter pelo menos 6 caracteres', 400);
+      // Import password validation
+      const { validatePasswordStrength } = await import('../utils/crypto.utils');
+      
+      // Validate password strength
+      const passwordValidation = validatePasswordStrength(password);
+      
+      if (!passwordValidation.valid) {
+        return createApiError(
+          'VALIDATION_ERROR', 
+          `Senha fraca. ${passwordValidation.feedback.join('. ')}`,
+          400
+        );
+      }
+      
+      // Additional password checks
+      if (password.length < 8) {
+        return createApiError('VALIDATION_ERROR', 'Senha deve ter pelo menos 8 caracteres', 400);
+      }
+      
+      if (password.toLowerCase().includes(email.split('@')[0].toLowerCase())) {
+        return createApiError('VALIDATION_ERROR', 'Senha não pode conter parte do email', 400);
+      }
+      
+      if (password.toLowerCase().includes(name.toLowerCase().split(' ')[0])) {
+        return createApiError('VALIDATION_ERROR', 'Senha não pode conter seu nome', 400);
       }
       
       // Verificar se email já existe
@@ -93,8 +116,17 @@ export const authController = {
       // Salvar usuário (simulado)
       localStorage.setItem(`user_${email}`, JSON.stringify(newUser));
       
-      // Enviar email de boas-vindas
-      await emailService.sendWelcomeEmail(email, name);
+      // Enviar email de boas-vindas (with error handling)
+      try {
+        await emailService.sendWelcomeEmail(email, name);
+      } catch (emailError) {
+        // Log but don't fail registration
+        console.error('Failed to send welcome email:', {
+          error: emailError,
+          userId: newUser.id,
+          timestamp: new Date().toISOString()
+        });
+      }
       
       // Gerar tokens
       const accessToken = generateToken({

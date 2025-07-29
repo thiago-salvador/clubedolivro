@@ -1,7 +1,8 @@
 import { API_CONFIG } from '../config';
 
-// Simulação de JWT para desenvolvimento
-// Em produção, usar uma biblioteca real como jsonwebtoken
+// Legacy JWT implementation - for fallback only
+// Use secure-jwt.utils.ts for production
+console.warn('Using legacy JWT implementation. Consider using secure-jwt.utils.ts');
 
 interface JWTPayload {
   [key: string]: any;

@@ -1,0 +1,271 @@
+/* Design System - Clube do Livro */
+
+/* ================================
+   1. CSS Custom Properties
+   ================================ */
+:root {
+  /* Colors - WCAG AA Compliant */
+  --color-terracota: #B8654B;
+  --color-terracota-dark: #96533C;
+  --color-terracota-darker: #7A4330; /* Better contrast */
+  --color-bege-claro: #F5E6D3;
+  --color-verde-oliva: #6B6B47;
+  --color-verde-oliva-dark: #555538;
+  --color-verde-floresta: #476B47;
+  --color-dourado: #D4A574;
+  --color-marrom-escuro: #4D381B;
+  
+  /* Text Colors */
+  --text-primary: #1f2937;
+  --text-secondary: #4b5563;
+  --text-muted: #6b7280;
+  --text-on-dark: #f9fafb;
+  
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  
+  /* Borders */
+  --border-radius-sm: 0.25rem;
+  --border-radius-md: 0.5rem;
+  --border-radius-lg: 1rem;
+  --border-radius-xl: 1.5rem;
+  --border-radius-full: 9999px;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  
+  /* Transitions */
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 300ms ease-in-out;
+  --transition-slow: 500ms ease-in-out;
+  
+  /* Z-index Scale */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+}
+
+/* ================================
+   2. Accessibility Utilities
+   ================================ */
+
+/* Screen Reader Only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Focus Visible */
+.focus-visible:focus {
+  outline: 2px solid var(--color-terracota);
+  outline-offset: 2px;
+}
+
+/* Skip to Content */
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  z-index: var(--z-tooltip);
+  padding: var(--space-md) var(--space-lg);
+  background-color: var(--color-terracota);
+  color: white;
+  text-decoration: none;
+  border-radius: var(--border-radius-md);
+}
+
+.skip-to-content:focus {
+  left: var(--space-md);
+  top: var(--space-md);
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  :root {
+    --color-terracota: #A85940;
+    --color-verde-oliva: #5A5A39;
+    --text-muted: #525252;
+  }
+}
+
+/* ================================
+   3. Animation Utilities
+   ================================ */
+
+/* Respect Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Fade Animations */
+.animate-fadeIn {
+  animation: fadeIn var(--transition-normal) ease-out;
+}
+
+.animate-slideIn {
+  animation: slideIn var(--transition-normal) ease-out;
+}
+
+/* ================================
+   4. Component Patterns
+   ================================ */
+
+/* Interactive Elements */
+.interactive {
+  position: relative;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.interactive:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.interactive:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Card Pattern */
+.card {
+  background: white;
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-fast);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* Loading States */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #f3f4f6 25%,
+    #e5e7eb 50%,
+    #f3f4f6 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* ================================
+   5. Form Patterns
+   ================================ */
+
+/* Form Field Focus States */
+.form-field:focus-within label {
+  color: var(--color-terracota);
+}
+
+/* Error States */
+.field-error {
+  border-color: #ef4444;
+  background-color: #fef2f2;
+}
+
+.field-error:focus {
+  ring-color: #ef4444;
+}
+
+/* Success States */
+.field-success {
+  border-color: #10b981;
+  background-color: #f0fdf4;
+}
+
+/* ================================
+   6. Performance Optimizations
+   ================================ */
+
+/* GPU Acceleration for Animations */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Optimize Font Loading */
+.font-display-swap {
+  font-display: swap;
+}
+
+/* ================================
+   7. Print Styles
+   ================================ */
+
+@media print {
+  /* Hide non-essential elements */
+  nav,
+  .no-print,
+  button,
+  .modal {
+    display: none !important;
+  }
+  
+  /* Optimize for print */
+  body {
+    font-size: 12pt;
+    line-height: 1.5;
+    color: black;
+    background: white;
+  }
+  
+  a {
+    text-decoration: underline;
+  }
+  
+  /* Show URLs */
+  a[href]:after {
+    content: " (" attr(href) ")";
+  }
+}
+
+/* ================================
+   8. Dark Mode Support (Future)
+   ================================ */
+
+@media (prefers-color-scheme: dark) {
+  .dark-mode-ready {
+    --bg-primary: #1f2937;
+    --bg-secondary: #374151;
+    --text-primary: #f9fafb;
+    --text-secondary: #e5e7eb;
+  }
+}

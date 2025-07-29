@@ -106,7 +106,7 @@ function simpleHash(str: string): string {
   return Math.abs(hash).toString(16).padStart(8, '0');
 }
 
-// Validar força da senha
+// Validar força da senha com requisitos mais rigorosos
 export function validatePasswordStrength(password: string): {
   valid: boolean;
   score: number;
@@ -115,13 +115,16 @@ export function validatePasswordStrength(password: string): {
   const feedback: string[] = [];
   let score = 0;
   
-  // Comprimento mínimo
-  if (password.length < 6) {
-    feedback.push('Senha deve ter pelo menos 6 caracteres');
-  } else if (password.length >= 8) {
+  // Comprimento mínimo atualizado
+  if (password.length < 8) {
+    feedback.push('Senha deve ter pelo menos 8 caracteres');
+  } else if (password.length >= 10) {
     score += 1;
   }
   if (password.length >= 12) {
+    score += 1;
+  }
+  if (password.length >= 16) {
     score += 1;
   }
   
@@ -147,14 +150,44 @@ export function validatePasswordStrength(password: string): {
   }
   
   // Caracteres especiais
-  if (/[^A-Za-z0-9]/.test(password)) {
+  if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
     score += 1;
   } else {
-    feedback.push('Adicione caracteres especiais');
+    feedback.push('Adicione caracteres especiais (!@#$%^&*...)');
+  }
+  
+  // Check for common patterns
+  const commonPatterns = [
+    /^123456/,
+    /^password/i,
+    /^qwerty/i,
+    /^abc123/i,
+    /^admin/i,
+    /^letmein/i,
+    /^welcome/i,
+    /^monkey/i,
+    /^dragon/i
+  ];
+  
+  if (commonPatterns.some(pattern => pattern.test(password))) {
+    feedback.push('Senha muito comum, escolha outra');
+    score = Math.max(0, score - 2);
+  }
+  
+  // Check for repeated characters
+  if (/(.)\1{2,}/.test(password)) {
+    feedback.push('Evite caracteres repetidos');
+    score = Math.max(0, score - 1);
+  }
+  
+  // Check for sequential characters
+  if (/(?:abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz|012|123|234|345|456|567|678|789)/i.test(password)) {
+    feedback.push('Evite sequências de caracteres');
+    score = Math.max(0, score - 1);
   }
   
   return {
-    valid: password.length >= 6 && score >= 3,
+    valid: password.length >= 8 && score >= 4,
     score: Math.min(score, 5),
     feedback
   };

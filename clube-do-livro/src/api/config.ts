@@ -2,13 +2,32 @@
 export const API_CONFIG = {
   version: 'v1',
   prefix: '/api/v1',
+  appName: 'clube-do-livro',
   
   // Configurações de segurança
   security: {
-    jwtSecret: process.env.REACT_APP_JWT_SECRET || 'clube-do-livro-jwt-secret-2025',
+    jwtSecret: process.env.REACT_APP_JWT_SECRET || (() => {
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('JWT_SECRET must be set in production environment');
+      }
+      console.warn('WARNING: Using default JWT secret for development only');
+      return 'dev-only-jwt-secret-do-not-use-in-production';
+    })(),
+    refreshTokenSecret: process.env.REACT_APP_REFRESH_TOKEN_SECRET || (() => {
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('REFRESH_TOKEN_SECRET must be set in production environment');
+      }
+      return 'dev-only-refresh-secret';
+    })(),
     jwtExpiresIn: '7d',
     refreshTokenExpiresIn: '30d',
-    bcryptRounds: 10
+    bcryptRounds: 10,
+    encryptionKey: process.env.REACT_APP_ENCRYPTION_KEY || (() => {
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('ENCRYPTION_KEY must be set in production environment');
+      }
+      return 'dev-only-encryption-key';
+    })()
   },
   
   // Configurações de rate limiting

@@ -49,28 +49,27 @@ interface NewPasswordData {
   password: string;
 }
 
-// Simulação de usuários no "banco de dados"
-const USERS_DB = [
-  {
+// In production, this would be replaced by a real database
+// For development, we'll use an in-memory store with hashed passwords
+const USERS_DB: any[] = [];
+
+// Initialize with development users only in non-production environments
+if (process.env.NODE_ENV === 'development') {
+  // These are only for development - in production, users register or are imported from database
+  console.warn('Running in development mode with mock users');
+  
+  // Add demo user for development
+  USERS_DB.push({
     id: '1',
     name: 'Maria Silva',
     email: 'maria@exemplo.com',
-    password: 'senha123', // Em produção, seria um hash
+    password: 'senha123', // In production this would be hashed
     cpf: '123.456.789-00',
     phone: '(11) 98765-4321',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+    avatar: 'https://ui-avatars.com/api/?name=Maria+Silva&background=E07A5F&color=fff',
     role: 'aluna'
-  },
-  {
-    id: '2',
-    name: 'Admin Sistema',
-    email: 'admin@clubedolivro.com',
-    password: 'admin123',
-    cpf: '987.654.321-00',
-    phone: '(11) 99999-9999',
-    role: 'super_admin'
-  }
-];
+  });
+}
 
 // Tokens armazenados (em produção, seria no servidor)
 const TOKENS_DB: Record<string, { userId: string; expiresAt: number }> = {};
@@ -120,7 +119,19 @@ export const authService = {
     
     const user = USERS_DB.find(u => u.email === credentials.email);
     
-    if (!user || user.password !== credentials.password) {
+    if (!user) {
+      throw new Error('Email ou senha inválidos');
+    }
+    
+    // Import crypto utils dynamically to avoid circular dependency
+    const { comparePassword } = await import('../api/utils/crypto.utils');
+    
+    // In production, passwords should be hashed
+    const isValidPassword = process.env.NODE_ENV === 'development' 
+      ? user.password === credentials.password 
+      : await comparePassword(credentials.password, user.password);
+    
+    if (!isValidPassword) {
       throw new Error('Email ou senha inválidos');
     }
     
@@ -149,12 +160,20 @@ export const authService = {
       throw new Error('Este email já está cadastrado');
     }
     
+    // Import crypto utils dynamically
+    const { hashPassword } = await import('../api/utils/crypto.utils');
+    
+    // Hash the password before storing
+    const hashedPassword = process.env.NODE_ENV === 'development' 
+      ? data.password 
+      : await hashPassword(data.password);
+    
     // Criar novo usuário
     const newUser = {
-      id: String(USERS_DB.length + 1),
+      id: String(Date.now()),
       name: data.name,
       email: data.email,
-      password: data.password,
+      password: hashedPassword,
       cpf: data.cpf,
       phone: data.phone,
       avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&background=E07A5F&color=fff`,
@@ -290,8 +309,16 @@ export const authService = {
       throw new Error('Usuário não encontrado');
     }
     
+    // Import crypto utils dynamically
+    const { hashPassword } = await import('../api/utils/crypto.utils');
+    
+    // Hash the new password before storing
+    const hashedPassword = process.env.NODE_ENV === 'development' 
+      ? data.password 
+      : await hashPassword(data.password);
+    
     // Atualizar senha
-    user.password = data.password;
+    user.password = hashedPassword;
     
     // Invalidar token
     delete RESET_TOKENS_DB[data.token];

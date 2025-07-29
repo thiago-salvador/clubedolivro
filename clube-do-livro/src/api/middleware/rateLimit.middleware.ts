@@ -4,11 +4,52 @@ interface RateLimitStore {
   [key: string]: {
     count: number;
     resetTime: number;
+    firstRequest?: number;
   };
 }
 
-// Store simulado para rate limiting
-const rateLimitStore: RateLimitStore = {};
+interface RateLimitInfo {
+  limit: number;
+  remaining: number;
+  reset: number;
+  retryAfter?: number;
+}
+
+// Enhanced rate limit store with automatic cleanup
+class RateLimitManager {
+  private store: RateLimitStore = {};
+  private cleanupInterval: any;
+
+  constructor() {
+    // Automatic cleanup every minute
+    this.cleanupInterval = setInterval(() => this.cleanup(), 60000);
+  }
+
+  private cleanup(): void {
+    const now = Date.now();
+    const cutoff = now - API_CONFIG.rateLimit.windowMs * 2;
+    
+    Object.keys(this.store).forEach(key => {
+      if (this.store[key].resetTime < cutoff) {
+        delete this.store[key];
+      }
+    });
+  }
+
+  public getStore(): RateLimitStore {
+    return this.store;
+  }
+
+  public destroy(): void {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+    }
+  }
+}
+
+// Global rate limit manager
+const rateLimitManager = new RateLimitManager();
+const rateLimitStore = rateLimitManager.getStore();
 
 export const rateLimiter = async (req: any): Promise<void> => {
   // Identificar cliente (em produção seria pelo IP real)
